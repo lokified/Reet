@@ -14,7 +14,8 @@ import com.loki.navigation.settingsScreen
 fun AccountNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    viewModel: NavigationViewModel
+    viewModel: NavigationViewModel,
+    onNavigateToLogin: (Screen) -> Unit
 ) {
 
     NavHost(
@@ -22,7 +23,7 @@ fun AccountNavGraph(
         startDestination = Screen.ProfileScreen.route,
         modifier = modifier
     ) {
-        profileScreen(onNavigateTo = navController::navigateTo, viewModel = viewModel)
+        profileScreen(onNavigateTo = navController::navigateTo, viewModel = viewModel, onNavigateToLogin = onNavigateToLogin)
         settingsScreen(onNavigateBack = navController::navigateUp, viewModel = viewModel)
     }
 }

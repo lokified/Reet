@@ -8,14 +8,13 @@ import com.loki.navigation.NavigationViewModel
 import com.loki.navigation.Screen
 import com.loki.navigation.accountNavGraph
 import com.loki.navigation.newsScreen
-import com.loki.navigation.reportListScreen
 import com.loki.navigation.reportNavGraph
 
 @Composable
 fun HomeNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    onNavigateToRoot: (Screen) -> Unit,
+    onNavigateToLogin: (Screen) -> Unit,
     viewModel: NavigationViewModel
 ) {
 
@@ -27,6 +26,6 @@ fun HomeNavGraph(
 
         reportNavGraph(viewModel)
         newsScreen()
-        accountNavGraph(viewModel)
+        accountNavGraph(viewModel, onNavigateToLogin)
     }
 }

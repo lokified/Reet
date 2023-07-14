@@ -41,6 +41,9 @@ android {
 
 dependencies {
 
+    implementation(project(":data:local"))
+    implementation(project(":data:remote"))
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.bundles.compose.debug)

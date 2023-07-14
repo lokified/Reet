@@ -54,6 +54,17 @@ dependencies {
 
     implementation(project(":core:navigation"))
     implementation(project(":core:ui"))
+    implementation(project(":data:local"))
+    implementation(project(":data:remote"))
+    implementation(project(":di"))
+    implementation(project(":feature:auth"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:new_report"))
+    implementation(project(":feature:news"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:report"))
+    implementation(project(":feature:settings"))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

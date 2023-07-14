@@ -3,12 +3,15 @@ package com.loki.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.loki.auth.login.LoginScreen
+import com.loki.auth.login.LoginViewModel
 import com.loki.auth.register.RegisterScreen
+import com.loki.auth.register.RegisterViewModel
 import com.loki.home.home.HomeScreen
 import com.loki.home.report_list.ReportListScreen
 import com.loki.navigation.ext.navigateTo
@@ -18,10 +21,11 @@ import com.loki.navigation.graph.ReportNavGraph
 import com.loki.new_report.NewReportScreen
 import com.loki.news.NewsScreen
 import com.loki.profile.ProfileScreen
+import com.loki.profile.ProfileViewModel
 import com.loki.report.ReportScreen
 import com.loki.settings.SettingsScreen
 
-fun NavGraphBuilder.homeNavGraph(onNavigateToRoot: (Screen) -> Unit) {
+fun NavGraphBuilder.homeNavGraph(onNavigateToLogin: (Screen) -> Unit) {
 
     composable(route = Screen.HomeScreen.route) {
 
@@ -46,7 +50,7 @@ fun NavGraphBuilder.homeNavGraph(onNavigateToRoot: (Screen) -> Unit) {
         val nestedGraph: @Composable () -> Unit = {
             HomeNavGraph(
                 navController = navController,
-                onNavigateToRoot = onNavigateToRoot,
+                onNavigateToLogin = onNavigateToLogin,
                 viewModel = viewModel
             )
         }
@@ -61,16 +65,21 @@ fun NavGraphBuilder.homeNavGraph(onNavigateToRoot: (Screen) -> Unit) {
 
 fun NavGraphBuilder.loginScreen(navigateTo: (Screen) -> Unit) {
     composable(route = Screen.LoginScreen.route) {
+        val viewModel = hiltViewModel<LoginViewModel>()
         LoginScreen(
-            navigateTo = { navigateTo(Screen.RegisterScreen) }
+            viewModel = viewModel,
+            navigateToRegister = { navigateTo(Screen.RegisterScreen) },
+            navigateToHome = { navigateTo(Screen.HomeScreen.withClearBackStack()) }
         )
     }
 }
 
 fun NavGraphBuilder.registerScreen(navigateTo: (Screen) -> Unit) {
     composable(route = Screen.RegisterScreen.route) {
+        val viewModel = hiltViewModel<RegisterViewModel>()
         RegisterScreen(
-            navigateTo = { navigateTo(Screen.HomeScreen) }
+            viewModel = viewModel,
+            navigateToLogin = { navigateTo(Screen.LoginScreen) }
         )
     }
 }
@@ -123,23 +132,28 @@ fun NavGraphBuilder.newsScreen() {
     }
 }
 
-fun NavGraphBuilder.accountNavGraph(viewModel: NavigationViewModel) {
+fun NavGraphBuilder.accountNavGraph(viewModel: NavigationViewModel, onNavigateToLogin: (Screen) -> Unit) {
     composable(route = Screen.ProfileScreen.route) {
         val navController = rememberNavController()
         AccountNavGraph(
             navController = navController,
-            viewModel = viewModel
+            viewModel = viewModel,
+            onNavigateToLogin = onNavigateToLogin
         )
     }
 }
 
-fun NavGraphBuilder.profileScreen(onNavigateTo: (Screen) -> Unit, viewModel: NavigationViewModel) {
+fun NavGraphBuilder.profileScreen(onNavigateTo: (Screen) -> Unit, onNavigateToLogin: (Screen) -> Unit, viewModel: NavigationViewModel) {
     composable(route = Screen.ProfileScreen.route) {
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(true)
         }
+
+        val profileViewModel = hiltViewModel<ProfileViewModel>()
         ProfileScreen(
-            navigateToSettings = { onNavigateTo(Screen.SettingsScreen) }
+            viewModel = profileViewModel,
+            navigateToSettings = { onNavigateTo(Screen.SettingsScreen) },
+            navigateToLogin = { onNavigateToLogin(Screen.LoginScreen) }
         )
     }
 }

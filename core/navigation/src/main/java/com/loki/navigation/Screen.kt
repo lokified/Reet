@@ -13,7 +13,6 @@ sealed class Screen(
     val restoreState: Boolean = true,
     val title: String? = null,
     val icon: ImageVector? = null,
-    val isNavVisible: Boolean = false
 ) {
 
     fun withClearBackStack() = apply { clearBackStack = true }
@@ -23,11 +22,11 @@ sealed class Screen(
     object LoginScreen: Screen("login_screen")
     object RegisterScreen: Screen("register_screen")
     object HomeScreen: Screen("home_screen")
-    object ReportListScreen: Screen(route = "report_list_screen", title = "Home", icon = Icons.Filled.Home, isNavVisible = true)
-    object NewsScreen: Screen(route = "news_screen", title = "News", restoreState = false, icon = Icons.Filled.Newspaper, isNavVisible = true)
+    object ReportListScreen: Screen(route = "report_list_screen", title = "Home", icon = Icons.Filled.Home)
+    object NewsScreen: Screen(route = "news_screen", title = "News", restoreState = false, icon = Icons.Filled.Newspaper)
     object NewReportScreen: Screen("new_report_screen")
     object ReportScreen: Screen("report_screen")
-    object ProfileScreen: Screen("profile_screen", title = "Profile", icon = Icons.Filled.AccountCircle, isNavVisible = true)
+    object ProfileScreen: Screen("profile_screen", title = "Profile", icon = Icons.Filled.AccountCircle)
     object SettingsScreen: Screen("settings_screen")
 
 }

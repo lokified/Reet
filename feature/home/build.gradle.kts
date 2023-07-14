@@ -41,7 +41,8 @@ android {
 
 dependencies {
 
-    implementation(project(":data"))
+    implementation(project(":data:local"))
+    implementation(project(":data:remote"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))

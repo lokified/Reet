@@ -55,6 +55,7 @@ dependencies {
     kapt(libs.bundles.hilt.kapt)
 
     implementation(project(":core:ui"))
+    implementation(project(":data:local"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:home"))
     implementation(project(":feature:new_report"))

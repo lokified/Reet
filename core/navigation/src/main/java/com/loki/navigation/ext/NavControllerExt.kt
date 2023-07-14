@@ -29,3 +29,15 @@ fun NavController.navigateTo(
         }
     }
 }
+
+fun NavController.clearAndRestart(
+    screen: Screen
+) {
+
+    navigate(screen.route) {
+        launchSingleTop = true
+        popUpTo(0) {
+            inclusive = true
+        }
+    }
+}

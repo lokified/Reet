@@ -27,9 +27,6 @@ fun BottomNavigation(
     isVisible: Boolean
 ) {
 
-    val routes = screens.map { it.route }
-    val destination = currentDestination?.hierarchy?.any { hie -> hie.route == routes.find { it == hie.route }} ?: false
-
     AnimatedVisibility(
         visible = isVisible,
         enter = slideInVertically(initialOffsetY = { it }),

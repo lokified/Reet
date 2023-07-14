@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun ProfileScreen(
-    navigateToSettings: () -> Unit
+    viewModel: ProfileViewModel,
+    navigateToSettings: () -> Unit,
+    navigateToLogin: () -> Unit
 ) {
 
     Box(
@@ -18,8 +20,9 @@ fun ProfileScreen(
         contentAlignment = Alignment.Center
     ) {
 
-        Button(onClick = navigateToSettings) {
-            Text(text = "Settings")
+
+        Button(onClick = { viewModel.logOut(navigateToLogin) }) {
+            Text(text = "Logout")
         }
 
     }
