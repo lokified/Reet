@@ -1,3 +1,4 @@
+include(":feature:settings")
 
 pluginManagement {
     repositories {
@@ -23,5 +24,6 @@ include(":data")
 include(":feature:auth")
 include(":feature:new_report")
 include(":feature:news")
-include(":feature:account")
+include(":feature:report")
 include(":feature:home")
+include(":feature:profile")

@@ -25,6 +25,12 @@ android {
             )
         }
     }
+    buildFeatures {
+        compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.4.7"
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -48,9 +54,12 @@ dependencies {
     implementation(libs.bundles.hilt)
     kapt(libs.bundles.hilt.kapt)
 
-    implementation(project(":feature:account"))
+    implementation(project(":core:ui"))
     implementation(project(":feature:auth"))
     implementation(project(":feature:home"))
     implementation(project(":feature:new_report"))
     implementation(project(":feature:news"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:report"))
+    implementation(project(":feature:settings"))
 }
