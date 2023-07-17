@@ -1,9 +1,12 @@
 package com.loki.auth.register
 
 data class RegisterState(
-    val name: String = "",
-    val isNameError: Boolean = false,
-    val nameError: String = "",
+    val firstName: String = "",
+    val isFirstNameError: Boolean = false,
+    val firstNameError: String = "",
+    val lastName: String = "",
+    val isLastNameError: Boolean = false,
+    val lastNameError: String = "",
     val email: String = "",
     val isEmailError: Boolean = false,
     val emailError: String = "",
@@ -13,4 +16,7 @@ data class RegisterState(
     val conPassword: String = "",
     val isConPasswordError: Boolean = false,
     val conPasswordError: String = "",
+    val userName: String = "",
+    val isUserNameError: Boolean = false,
+    val userNameError: String = "",
 )

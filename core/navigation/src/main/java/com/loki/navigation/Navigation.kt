@@ -14,6 +14,7 @@ import com.loki.auth.register.RegisterScreen
 import com.loki.auth.register.RegisterViewModel
 import com.loki.home.home.HomeScreen
 import com.loki.home.report_list.ReportListScreen
+import com.loki.home.report_list.ReportListViewModel
 import com.loki.navigation.ext.navigateTo
 import com.loki.navigation.graph.AccountNavGraph
 import com.loki.navigation.graph.HomeNavGraph
@@ -94,10 +95,15 @@ fun NavGraphBuilder.reportNavGraph(viewModel: NavigationViewModel) {
 
 fun NavGraphBuilder.reportListScreen(onNavigateTo: (Screen) -> Unit, viewModel: NavigationViewModel) {
     composable(route = Screen.ReportListScreen.route) {
+
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(true)
         }
+
+        val reportListViewModel = hiltViewModel<ReportListViewModel>()
+
         ReportListScreen(
+            viewModel = reportListViewModel,
             navigateToNewReport = {
                 onNavigateTo(Screen.NewReportScreen)
             },

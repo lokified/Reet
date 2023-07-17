@@ -1,7 +1,7 @@
 package com.loki.profile
 
 import com.loki.local.datastore.DataStoreStorage
-import com.loki.local.datastore.model.User
+import com.loki.local.datastore.model.LocalUser
 import com.loki.remote.auth.AuthRepository
 import com.loki.ui.viewmodel.ReetViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +17,7 @@ class ProfileViewModel @Inject constructor(
     fun logOut(navigateToLogin: () -> Unit) {
         launchCatching {
             auth.signOut()
-            updateUser(User())
+            updateUser(LocalUser())
             navigateToLogin()
         }
     }

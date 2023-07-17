@@ -36,7 +36,8 @@ fun NormalInput(
     errorMessage: String,
     isError: Boolean,
     leadingIcon: ImageVector? = null,
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    isEnabled: Boolean = true
 ) {
 
     var passwordVisible by remember { mutableStateOf(false) }
@@ -48,20 +49,22 @@ fun NormalInput(
         },
         isError = isError,
         label = {
-            Text(text = label, modifier = Modifier.padding(bottom = 8.dp))
+            Text(text = label)
         },
         placeholder = {
             Text(text = placeholder)
         },
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 4.dp),
+        modifier = modifier.fillMaxWidth(),
         keyboardOptions = KeyboardOptions(
             keyboardType = keyboardType
         ),
+        enabled = isEnabled,
         visualTransformation = if (!passwordVisible && keyboardType == KeyboardType.Password) PasswordVisualTransformation()
         else VisualTransformation.None,
-        leadingIcon = { Icon(imageVector = leadingIcon!!, contentDescription = null) },
+        leadingIcon = {
+            if (leadingIcon != null) {
+                Icon(imageVector = leadingIcon, contentDescription = null)
+            } },
         trailingIcon = {
 
             if(keyboardType == KeyboardType.Password) {

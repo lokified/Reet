@@ -2,14 +2,15 @@ package com.loki.local.datastore
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.loki.local.datastore.model.User
+import com.loki.local.datastore.model.LocalUser
 import kotlinx.coroutines.flow.Flow
 
 interface DataStoreStorage {
 
-    suspend fun saveUser(user: User)
+    suspend fun saveUser(localUser: LocalUser)
 
-    suspend fun getUser(): Flow<User>
+    suspend fun getUser(): Flow<LocalUser>
+
 
     object UserPreferences {
         val USER_ID_KEY = stringPreferencesKey("user_id_key")

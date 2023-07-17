@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.loki.local.datastore.DataStoreStorage
-import com.loki.local.datastore.model.User
+import com.loki.local.datastore.model.LocalUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -20,19 +20,43 @@ open class ReetViewModel(
     var errorMessage = mutableStateOf("")
     var isLoading = mutableStateOf(false)
 
-    val user = mutableStateOf(com.loki.remote.model.User())
+    val localUser = mutableStateOf(LocalUser())
+    var userId = mutableStateOf("")
+    val userInitial = mutableStateOf("")
 
+    fun getUser() {
+        launchCatching {
+            dataStore.getUser().collect {
+                localUser.value = LocalUser(
+                    userId = it.userId,
+                    name = it.name,
+                    email = it.email,
+                    isLoggedIn = it.isLoggedIn
+                )
 
+                var firstName = ""
+                var lastName = ""
 
-    fun updateUser(user: User) {
+                if (it.name.isNotBlank()) {
+                    val userList = it.name.split(" ")
+                    firstName = userList[0][0].toString()
+                    lastName = userList[1][0].toString()
+                }
+
+                userInitial.value = firstName + lastName
+            }
+        }
+    }
+
+    fun updateUser(localUser: LocalUser) {
 
         viewModelScope.launch {
             dataStore.saveUser(
-                User(
-                    userId = user.userId,
-                    name = user.name,
-                    email = user.email,
-                    isLoggedIn = user.isLoggedIn
+                LocalUser(
+                    userId = localUser.userId,
+                    name = localUser.name,
+                    email = localUser.email,
+                    isLoggedIn = localUser.isLoggedIn
                 )
             )
         }
