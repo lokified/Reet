@@ -40,15 +40,15 @@ class AuthRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun authenticate(email: String, password: String) {
+    override suspend fun authenticate(email: String, password: String): String? {
         trace(LOGIN_USER_TRACE) {
-            auth.signInWithEmailAndPassword(email, password).await()
+            return auth.signInWithEmailAndPassword(email, password).await()?.user?.uid
         }
     }
 
-    override suspend fun createAccount(names: String, email: String, password: String) {
+    override suspend fun createAccount(names: String, email: String, password: String): String? {
         trace(SIGNUP_USER_TRACE) {
-            auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            return auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
 
                 if (task.isSuccessful) {
                     val request = UserProfileChangeRequest.Builder().apply {
@@ -58,7 +58,7 @@ class AuthRepositoryImpl @Inject constructor(
                     auth.currentUser?.updateProfile(request)
                 }
 
-            }.await()
+            }.await().user?.uid
         }
     }
 
@@ -91,6 +91,8 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     companion object {
+
+        //traces
         const val LOGIN_USER_TRACE = "login_trace"
         const val SIGNUP_USER_TRACE = "signup_trace"
         const val UPDATE_USER_TRACE = "update_trace"

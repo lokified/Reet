@@ -48,5 +48,5 @@ dependencies {
     implementation(libs.bundles.compose)
     implementation(libs.bundles.compose.debug)
     implementation(libs.bundles.lifecycle)
-    implementation(libs.coil.kt)
+    implementation(libs.coil.kt.compose)
 }

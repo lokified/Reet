@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -36,6 +37,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.loki.ui.components.Loading
 import com.loki.ui.components.NormalInput
+import com.loki.ui.components.ProfileSetUpSheet
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -53,17 +55,18 @@ fun LoginScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val lifecycle = lifecycleOwner.lifecycle
 
+    val textColor = if (viewModel.isLoading.value) MaterialTheme.colorScheme.onBackground.copy(.5f)
+        else MaterialTheme.colorScheme.onBackground
+
     DisposableEffect(key1 = lifecycle) {
         val lifecycleObserver = LifecycleEventObserver { _, event ->
             when(event) {
                 Lifecycle.Event.ON_PAUSE -> {
                     viewModel.errorMessage.value = ""
                 }
-
                 Lifecycle.Event.ON_CREATE -> {
                     viewModel.onAppStart(navigateToHome)
                 }
-
                 else -> {}
             }
         }
@@ -92,7 +95,8 @@ fun LoginScreen(
             Text(
                 text = "Lets Log you in",
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = textColor
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -104,7 +108,8 @@ fun LoginScreen(
                 onValueChange = viewModel::onEmailChange,
                 errorMessage = uiState.emailError,
                 isError = uiState.isEmailError,
-                leadingIcon = Icons.Filled.Email
+                leadingIcon = Icons.Filled.Email,
+                isEnabled = !viewModel.isLoading.value
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -117,7 +122,8 @@ fun LoginScreen(
                 errorMessage = uiState.passwordError,
                 isError = uiState.isPasswordError,
                 leadingIcon = Icons.Filled.Lock,
-                keyboardType = KeyboardType.Password
+                keyboardType = KeyboardType.Password,
+                isEnabled = !viewModel.isLoading.value
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -127,7 +133,8 @@ fun LoginScreen(
                 fontSize = 18.sp,
                 modifier = Modifier
                     .padding(vertical = 4.dp)
-                    .clickable { }
+                    .clickable { },
+                color = textColor
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -137,13 +144,13 @@ fun LoginScreen(
                     keyboardController?.hide()
                     viewModel.login(navigateToHome)
                 },
+                enabled = !viewModel.isLoading.value,
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(CenterHorizontally)
             ) {
                 Text(text = "Login")
             }
-
         }
 
         Text(
@@ -151,8 +158,42 @@ fun LoginScreen(
             modifier = Modifier
                 .padding(16.dp)
                 .align(BottomCenter)
-                .clickable { navigateToRegister() }
+                .clickable {
+                    if (!viewModel.isLoading.value) {
+                        navigateToRegister()
+                    }
+                },
+            color = textColor
         )
+    }
+
+    if (viewModel.isProfileSheetVisible.value) {
+        ProfileSetUpSheet(
+            onDismiss = {
+                viewModel.isProfileSheetVisible.value = false
+                viewModel.onCancelProfileSheet()
+            },
+            onComplete = {
+                viewModel.setUpProfile(
+                    navigateToHome = {
+                        navigateToHome()
+                        viewModel.isProfileSheetVisible.value = false
+                    }
+                )
+            },
+            isEnabled = !viewModel.isLoading.value,
+            name = viewModel.completeProfileUserName.value
+        ) {
+            NormalInput(
+                label = "Username",
+                placeholder = "Username",
+                value = uiState.userName,
+                onValueChange = viewModel::onUsernameChange,
+                errorMessage = uiState.userNameError,
+                isError = uiState.isUserNameError,
+                isEnabled = !viewModel.isLoading.value
+            )
+        }
     }
 
     if (viewModel.isLoading.value) {

@@ -93,6 +93,7 @@ firebase-perfomance = { group = "com.google.firebase", name = "firebase-perf-ktx
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging-ktx" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
+firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 kotlinx-playServices = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxPlayService" }
 
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
@@ -151,7 +152,8 @@ firebase = [
     "firebase-firestore",
     "firebase-messaging",
     "firebase-perfomance",
-    "kotlinx-playServices"
+    "kotlinx-playServices",
+    "firebase-storage"
 ]
 
 retrofit = [
