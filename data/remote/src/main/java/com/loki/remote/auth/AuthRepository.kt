@@ -17,4 +17,6 @@ interface AuthRepository {
     suspend fun sendRecoveryEmail(email: String)
     suspend fun deleteAccount()
     suspend fun signOut()
+    suspend fun setUpProfile(profile: Profile)
+    suspend fun getProfile(userId: String): Profile?
 }
