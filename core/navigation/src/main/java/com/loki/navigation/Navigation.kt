@@ -5,9 +5,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.loki.auth.login.LoginScreen
 import com.loki.auth.login.LoginViewModel
 import com.loki.auth.register.RegisterScreen
@@ -25,7 +27,9 @@ import com.loki.news.NewsScreen
 import com.loki.profile.ProfileScreen
 import com.loki.profile.ProfileViewModel
 import com.loki.report.ReportScreen
+import com.loki.report.ReportViewModel
 import com.loki.settings.SettingsScreen
+import com.loki.ui.utils.Constants.REPORT_ID
 
 fun NavGraphBuilder.homeNavGraph(onNavigateToLogin: (Screen) -> Unit) {
 
@@ -108,8 +112,8 @@ fun NavGraphBuilder.reportListScreen(onNavigateTo: (Screen) -> Unit, viewModel: 
             navigateToNewReport = {
                 onNavigateTo(Screen.NewReportScreen)
             },
-            navigateToReport = {
-                onNavigateTo(Screen.ReportScreen)
+            navigateToReport = { reportId ->
+                onNavigateTo(Screen.ReportScreen.navWith(reportId))
             }
         )
     }
@@ -123,17 +127,30 @@ fun NavGraphBuilder.newReportScreen(onNavigateTo: (Screen) -> Unit, viewModel: N
         val newReportViewModel = hiltViewModel<NewReportViewModel>()
         NewReportScreen(
             viewModel = newReportViewModel,
-            navigateToHome = { onNavigateTo(Screen.ReportListScreen) }
+            navigateToHome = {
+                onNavigateTo(Screen.ReportListScreen)
+            }
         )
     }
 }
 
 fun NavGraphBuilder.reportScreen(onNavigateBack: () -> Unit, viewModel: NavigationViewModel) {
-    composable(route = Screen.ReportScreen.route) {
+    composable(
+        route = Screen.ReportScreen.withReportId(),
+        arguments = listOf(
+            navArgument(REPORT_ID) {
+                type = NavType.StringType
+            }
+        )
+    ) {
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(false)
         }
-        ReportScreen(onNavigateBack = onNavigateBack)
+        val reportViewModel = hiltViewModel<ReportViewModel>()
+        ReportScreen(
+            viewModel = reportViewModel,
+            onNavigateBack = onNavigateBack
+        )
     }
 }
 

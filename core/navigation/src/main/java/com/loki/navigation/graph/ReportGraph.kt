@@ -25,7 +25,7 @@ fun ReportNavGraph(
     ) {
 
         reportListScreen(onNavigateTo = navController::navigateTo, viewModel = viewModel)
-        reportScreen(onNavigateBack = navController::navigateUp, viewModel = viewModel)
+        reportScreen(onNavigateBack = { navController.popBackStack() }, viewModel = viewModel)
         newReportScreen(onNavigateTo = navController::navigateTo, viewModel = viewModel)
     }
 }

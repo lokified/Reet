@@ -5,6 +5,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.loki.ui.utils.Constants.REPORT_ID
 
 sealed class Screen(
     val route: String,
@@ -18,6 +19,10 @@ sealed class Screen(
     fun withClearBackStack() = apply { clearBackStack = true }
 
     fun navWith(path: String) = apply { routePath = path }
+
+    fun withReportId(): String {
+        return "${ReportScreen.route}/{$REPORT_ID}"
+    }
 
     object LoginScreen: Screen("login_screen")
     object RegisterScreen: Screen("register_screen")

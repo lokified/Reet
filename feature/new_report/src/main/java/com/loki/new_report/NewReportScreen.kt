@@ -1,11 +1,5 @@
 package com.loki.new_report
 
-import android.Manifest
-import android.Manifest.permission.CAMERA
-import android.Manifest.permission.READ_EXTERNAL_STORAGE
-import android.Manifest.permission.READ_MEDIA_IMAGES
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.app.Activity
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -32,10 +26,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.loki.ui.components.AppTopBar
 import com.loki.ui.components.ProfileCircleBox
+import kotlinx.coroutines.job
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,13 +58,15 @@ fun NewReportScreen(
 
     val context = LocalContext.current
 
-    val activity = remember { context as? Activity }
+    val focusRequester = remember { FocusRequester() }
 
-//    val focusRequester = remember { FocusRequester() }
-//
-//    LaunchedEffect(key1 = Unit) {
-//        focusRequester.requestFocus()
-//    }
+    LaunchedEffect(key1 = Unit) {
+        this.coroutineContext.job.invokeOnCompletion {
+            focusRequester.requestFocus()
+        }
+    }
+
+    var isGalleryClicked by rememberSaveable { mutableStateOf(false) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -76,6 +74,7 @@ fun NewReportScreen(
 
         uri?.let {
             viewModel.onChangeImageUri(uri)
+            isGalleryClicked = false
         }
     }
 
@@ -114,7 +113,8 @@ fun NewReportScreen(
                 Image(
                     bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it).asImageBitmap(),
                     contentDescription = null,
-                    modifier = Modifier.padding(vertical = 4.dp, horizontal = 16.dp)
+                    modifier = Modifier
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
                         .size(150.dp),
                     contentScale = ContentScale.Fit
                 )
@@ -129,7 +129,8 @@ fun NewReportScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp)
-                    .height(150.dp),
+                    .height(150.dp)
+                    .focusRequester(focusRequester),
                 enabled = !viewModel.isLoading.value,
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.primary.copy(.02f),
@@ -146,9 +147,7 @@ fun NewReportScreen(
 
                 IconButton(
                     onClick = {
-                        galleryLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
+                        isGalleryClicked = true
                     }
                 ) {
 
@@ -171,23 +170,12 @@ fun NewReportScreen(
             ).show()
         }
     }
-}
 
-//private fun checkPermission(activity: Activity): Boolean {
-//
-//    return if (activity.checkSelfPermission( WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//        true
-//    }
-//    else if(activity.checkSelfPermission(CAMERA) == PackageManager.PERMISSION_GRANTED) {
-//        true
-//    }
-//    else {
-//        ActivityCompat.requestPermissions(
-//            activity, arrayOf(
-//                READ_EXTERNAL_STORAGE,
-//                WRITE_EXTERNAL_STORAGE,
-//                CAMERA
-//            ), 1
-//        ); false
-//    }
-//}
+    if (isGalleryClicked) {
+        SideEffect {
+            galleryLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
+    }
+}

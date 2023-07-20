@@ -11,7 +11,7 @@ fun NavController.navigateTo(
     val currentRoute: String? = this.currentBackStackEntry?.destination?.route
 
     val route = screen.routePath?.let { routePath ->
-        screen.route.replaceAfter("/", routePath)
+        screen.route + "/$routePath"
     } ?: screen.route
 
     navigate(route) {

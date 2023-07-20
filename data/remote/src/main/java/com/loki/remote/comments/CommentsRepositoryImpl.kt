@@ -1,37 +1,85 @@
 package com.loki.remote.comments
 
+import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.dataObjects
+import com.google.firebase.firestore.Query
+import com.loki.remote.Resource
 import com.loki.remote.model.Comment
+import com.loki.remote.model.MatchedComment
+import com.loki.remote.model.Profile
+import com.loki.remote.profiles.ProfilesRepository
 import com.loki.remote.reports.ReportsRepository
+import com.loki.remote.reports.ReportsRepositoryImpl
 import com.loki.remote.trace
-import dagger.hilt.android.scopes.ActivityScoped
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class CommentsRepositoryImpl @Inject constructor(
     private val storage: FirebaseFirestore,
-    private val report: ReportsRepository
+    private val reportsRepository: ReportsRepository
 ): CommentsRepository {
 
-    override val comments: Flow<List<Comment>>
-        get() = storage.collection(COMMENTS_COLLECTION)
-            .whereEqualTo(REPORT_ID_FIELD, report.getReportId())
-            .dataObjects()
+    override suspend fun getComments(reportId: String): Flow<Resource<List<MatchedComment>>> = callbackFlow {
+
+        trySend(Resource.Loading())
+
+        val subscription = storage.collection(REPORTS_COLLECTION)
+            .document(COMMENT)
+            .collection(COMMENTS_COLLECTION)
+            .whereEqualTo(REPORT_ID_FIELD, reportId)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+
+                error?.let { e ->
+                    trySend(Resource.Error(e.message.toString()))
+                    cancel(e.message.toString())
+                }
+
+                snapshot?.let {
+
+                    if (!it.isEmpty) {
+
+                        val comments = it.toObjects(Comment::class.java)
+
+                        val matchedComments = comments.mapNotNull { comment ->
+                            reportsRepository.profiles?.find { profile ->
+                                profile.userId == comment.userId }?.let { matchedProfile ->
+                                MatchedComment(matchedProfile, comment)
+                            }
+                        }
+
+                        trySend(
+                            Resource.Success(matchedComments)
+                        )
+                    }
+                }
+            }
+
+        awaitClose { subscription.remove() }
+    }
 
     override suspend fun addComment(comment: Comment) {
         trace(ADD_COMMENT_TRACE) {
-            val commentWithId = comment.copy(reportId = report.getReportId())
-            storage.collection(COMMENTS_COLLECTION)
-                .add(commentWithId)
+            storage.collection(REPORTS_COLLECTION)
+                .document(COMMENT)
+                .collection(COMMENTS_COLLECTION)
+                .add(comment)
                 .await()
         }
     }
 
     override suspend fun editComment(comment: Comment) {
         trace(UPDATE_COMMENT_TRACE) {
-            storage.collection(COMMENTS_COLLECTION)
+            storage.collection(REPORTS_COLLECTION)
+                .document(COMMENT)
+                .collection(COMMENTS_COLLECTION)
                 .document(comment.id)
                 .set(comment)
                 .await()
@@ -40,7 +88,9 @@ class CommentsRepositoryImpl @Inject constructor(
 
     override suspend fun deleteComment(commentId: String) {
         trace(DELETE_COMMENT_TRACE) {
-            storage.collection(COMMENTS_COLLECTION)
+            storage.collection(REPORTS_COLLECTION)
+                .document(COMMENT)
+                .collection(COMMENTS_COLLECTION)
                 .document(commentId)
                 .delete()
                 .await()
@@ -50,7 +100,9 @@ class CommentsRepositoryImpl @Inject constructor(
     companion object {
 
         //collections
-        const val COMMENTS_COLLECTION = "reports"
+        const val REPORTS_COLLECTION = "report_collections"
+        const val COMMENT = "comment"
+        const val COMMENTS_COLLECTION = "comments_collections"
         const val REPORT_ID_FIELD = "reportId"
 
         //traces

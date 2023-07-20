@@ -11,10 +11,6 @@ import com.loki.remote.reports.ReportsRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
-import dagger.hilt.android.components.ViewModelComponent
-import dagger.hilt.android.scopes.ActivityScoped
-import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -35,7 +31,10 @@ object ReportRepositoryModule {
 
     @Provides
     @Singleton
-    fun provideCommentsRepository(storage: FirebaseFirestore, report: ReportsRepository) : CommentsRepository {
-        return CommentsRepositoryImpl(storage, report)
+    fun provideCommentsRepository(
+        storage: FirebaseFirestore,
+        reports: ReportsRepository
+    ) : CommentsRepository {
+        return CommentsRepositoryImpl(storage, reports)
     }
 }

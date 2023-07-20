@@ -8,5 +8,6 @@ data class Comment(
     val commentContent: String = "",
     val createdAt: Long? = null,
     val createdOn: Long? = null,
-    val reportId: String = ""
+    val reportId: String = "",
+    val userId: String = ""
 )

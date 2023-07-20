@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.storage.FirebaseStorage
 import com.loki.remote.Resource
 import com.loki.remote.auth.AuthRepository
@@ -31,6 +30,10 @@ class ReportsRepositoryImpl @Inject constructor(
     private val profilesRepository: ProfilesRepository
 ): ReportsRepository {
 
+
+    override val profiles: List<Profile>?
+        get() = profileList.value
+
     override suspend fun getReports(): Flow<Resource<List<MatchedReport>>> = callbackFlow {
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -46,8 +49,6 @@ class ReportsRepositoryImpl @Inject constructor(
                         cancel(e.message.toString())
                     }
 
-
-
                     snapshot?.let {
 
                         if (!it.isEmpty) {
@@ -55,7 +56,7 @@ class ReportsRepositoryImpl @Inject constructor(
                             val reports = it.toObjects(Report::class.java)
 
                             val matchedReports = reports.mapNotNull { report ->
-                                profiles.value?.find { profile -> profile.userId == report.userId }?.let { matchedProfile ->
+                                profileList.value?.find { profile -> profile.userId == report.userId }?.let { matchedProfile ->
                                     MatchedReport(report, matchedProfile)
                                 }
                             }
@@ -93,12 +94,22 @@ class ReportsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getReport(reportId: String): Report? {
+    override suspend fun getReport(reportId: String): MatchedReport {
         trace(GET_REPORT_TRACE) {
             reportIds.value = reportId
-            return storage.collection(REPORTS_COLLECTION)
+
+            val report = storage.collection(REPORTS_COLLECTION)
                 .document(reportId)
-                .get().await().toObject()
+                .get().await().toObject(Report::class.java)
+
+            val matchedProfile = profileList.value?.find { profile ->
+                profile.userId == report?.userId
+            }
+
+            return MatchedReport(
+                report = report!!,
+                profile = matchedProfile!!
+            )
         }
     }
 
@@ -123,7 +134,7 @@ class ReportsRepositoryImpl @Inject constructor(
 
     override suspend fun getProfiles() {
         profilesRepository.getProfiles().collect { results ->
-            profiles.value = results
+            profileList.value = results
         }
     }
 
@@ -137,8 +148,8 @@ class ReportsRepositoryImpl @Inject constructor(
 
     companion object {
 
-        val reportIds = mutableStateOf("")
-        var profiles = mutableStateOf<List<Profile>?>(null)
+        private var reportIds = mutableStateOf("")
+        var profileList = mutableStateOf<List<Profile>?>(null)
 
         //collections
         const val REPORTS_COLLECTION = "report_collections"

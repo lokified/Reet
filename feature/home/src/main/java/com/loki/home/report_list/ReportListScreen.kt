@@ -40,7 +40,7 @@ import com.loki.ui.components.ReportItem
 fun ReportListScreen(
     viewModel: ReportListViewModel,
     navigateToNewReport: () -> Unit,
-    navigateToReport: () -> Unit
+    navigateToReport: (reportId: String) -> Unit
 ) {
 
     val uiState by viewModel.reportsUiState.collectAsStateWithLifecycle()
@@ -53,7 +53,7 @@ fun ReportListScreen(
                 leadingItem = {
                     ProfileCircleBox(
                         initials = viewModel.userInitial.value,
-                        backgroundColor = Color(viewModel.profileBackground.value!!),
+                        backgroundColor = Color(viewModel.profileBackground.value),
                         initialsSize = 20,
                         modifier = Modifier.size(40.dp)
                     )
@@ -84,7 +84,8 @@ fun ReportListScreen(
                         matchedReport = matchedReport,
                         modifier = Modifier.padding(
                             vertical = 8.dp
-                        )
+                        ),
+                        onItemClick = navigateToReport
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Divider(
