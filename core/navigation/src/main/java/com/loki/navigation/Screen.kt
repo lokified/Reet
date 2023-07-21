@@ -30,7 +30,7 @@ sealed class Screen(
     object ReportListScreen: Screen(route = "report_list_screen", title = "Home", icon = Icons.Filled.Home)
     object NewsScreen: Screen(route = "news_screen", title = "News", restoreState = false, icon = Icons.Filled.Newspaper)
     object NewReportScreen: Screen("new_report_screen")
-    object ReportScreen: Screen("report_screen")
+    object ReportScreen: Screen("report_screen", restoreState = false)
     object ProfileScreen: Screen("profile_screen", title = "Profile", icon = Icons.Filled.AccountCircle)
     object SettingsScreen: Screen("settings_screen")
 

@@ -44,4 +44,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
     implementation(libs.androidx.datastore)
+
+    implementation(libs.bundles.retrofit)
 }

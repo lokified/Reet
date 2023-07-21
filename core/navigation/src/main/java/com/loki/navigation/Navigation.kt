@@ -26,6 +26,7 @@ import com.loki.navigation.graph.ReportNavGraph
 import com.loki.new_report.NewReportScreen
 import com.loki.new_report.NewReportViewModel
 import com.loki.news.NewsScreen
+import com.loki.news.NewsViewModel
 import com.loki.profile.ProfileScreen
 import com.loki.profile.ProfileViewModel
 import com.loki.report.ReportScreen
@@ -171,7 +172,10 @@ fun NavGraphBuilder.reportScreen(onNavigateBack: () -> Unit, viewModel: Navigati
 
 fun NavGraphBuilder.newsScreen() {
     composable(route = Screen.NewsScreen.route) {
-        NewsScreen()
+        val viewModel = hiltViewModel<NewsViewModel>()
+        NewsScreen(
+            viewModel = viewModel
+        )
     }
 }
 

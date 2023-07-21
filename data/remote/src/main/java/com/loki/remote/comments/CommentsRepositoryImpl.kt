@@ -2,11 +2,11 @@ package com.loki.remote.comments
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.loki.remote.Resource
+import com.loki.remote.util.Resource
 import com.loki.remote.model.Comment
 import com.loki.remote.model.MatchedComment
 import com.loki.remote.reports.ReportsRepository
-import com.loki.remote.trace
+import com.loki.remote.util.trace
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

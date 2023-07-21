@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import com.google.firebase.FirebaseException
 import com.loki.local.datastore.DataStoreStorage
-import com.loki.remote.Resource
+import com.loki.remote.util.Resource
 import com.loki.remote.comments.CommentsRepository
 import com.loki.remote.model.Comment
 import com.loki.remote.reports.ReportsRepository

@@ -5,13 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
-import com.loki.remote.Resource
+import com.loki.remote.util.Resource
 import com.loki.remote.auth.AuthRepository
 import com.loki.remote.model.MatchedReport
 import com.loki.remote.model.Profile
 import com.loki.remote.model.Report
 import com.loki.remote.profiles.ProfilesRepository
-import com.loki.remote.trace
+import com.loki.remote.util.trace
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel

@@ -1,7 +1,7 @@
 package com.loki.remote.reports
 
 import android.net.Uri
-import com.loki.remote.Resource
+import com.loki.remote.util.Resource
 import com.loki.remote.model.MatchedReport
 import com.loki.remote.model.Profile
 import com.loki.remote.model.Report

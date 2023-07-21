@@ -1,7 +1,7 @@
 package com.loki.home.report_list
 
 import com.loki.local.datastore.DataStoreStorage
-import com.loki.remote.Resource
+import com.loki.remote.util.Resource
 import com.loki.remote.reports.ReportsRepository
 import com.loki.ui.viewmodel.ReetViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

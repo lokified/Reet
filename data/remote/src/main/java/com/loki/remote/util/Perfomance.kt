@@ -1,4 +1,4 @@
-package com.loki.remote
+package com.loki.remote.util
 
 import com.google.firebase.perf.ktx.trace
 import com.google.firebase.perf.metrics.Trace

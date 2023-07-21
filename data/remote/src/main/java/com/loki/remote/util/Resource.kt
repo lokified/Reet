@@ -1,4 +1,4 @@
-package com.loki.remote
+package com.loki.remote.util
 
 sealed class Resource<out T> {
     class Loading<out T> : Resource<T>()
