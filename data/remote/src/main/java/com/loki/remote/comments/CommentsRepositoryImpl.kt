@@ -1,23 +1,16 @@
 package com.loki.remote.comments
 
-import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.loki.remote.Resource
 import com.loki.remote.model.Comment
 import com.loki.remote.model.MatchedComment
-import com.loki.remote.model.Profile
-import com.loki.remote.profiles.ProfilesRepository
 import com.loki.remote.reports.ReportsRepository
-import com.loki.remote.reports.ReportsRepositoryImpl
 import com.loki.remote.trace
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 

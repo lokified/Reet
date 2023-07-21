@@ -41,7 +41,8 @@ fun ReportItem(
     val profile = matchedReport.profile
 
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .clickable { onItemClick(report.id) }
     ) {
         Row(modifier = modifier.fillMaxWidth()) {

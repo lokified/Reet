@@ -1,18 +1,12 @@
 package com.loki.home.report_list
 
-import androidx.lifecycle.viewModelScope
 import com.loki.local.datastore.DataStoreStorage
 import com.loki.remote.Resource
-import com.loki.remote.model.MatchedReport
-import com.loki.remote.profiles.ProfilesRepository
 import com.loki.remote.reports.ReportsRepository
 import com.loki.ui.viewmodel.ReetViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,6 +42,12 @@ class ReportListViewModel @Inject constructor(
                         _reportUiState.value = ReportUiState(
                             matchedReport = matchedReports
                         )
+
+                        if (_reportUiState.value.matchedReport.isEmpty()) {
+                            _reportUiState.value = ReportUiState(
+                                isLoading = false
+                            )
+                        }
                     }
 
                     is Resource.Error -> {

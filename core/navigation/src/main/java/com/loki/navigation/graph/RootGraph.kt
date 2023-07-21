@@ -7,6 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.loki.navigation.NavigationViewModel
 import com.loki.navigation.Screen
 import com.loki.navigation.ext.clearAndRestart
 import com.loki.navigation.ext.navigateTo
@@ -21,6 +22,7 @@ fun RootNavGraph(
     startDestination: Screen
 ) {
     val logoutEvent = rememberSaveable { mutableStateOf(false) }
+    val viewModel = NavigationViewModel()
 
     LaunchedEffect(logoutEvent.value) {
         if (logoutEvent.value) {
@@ -37,12 +39,13 @@ fun RootNavGraph(
     ) {
 
 
-        loginScreen(navigateTo = navController::navigateTo)
+        loginScreen(viewModel = viewModel, navigateTo = navController::navigateTo)
         registerScreen(navigateTo = navController::navigateTo)
         homeNavGraph(
             onNavigateToLogin = {
                 logoutEvent.value = true
-            }
+            },
+            viewModel = viewModel
         )
     }
 }

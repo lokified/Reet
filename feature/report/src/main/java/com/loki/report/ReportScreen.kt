@@ -29,6 +29,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -53,7 +55,7 @@ import com.loki.ui.utils.DateUtil.formatDate
 import com.loki.ui.utils.DateUtil.formatTime
 import com.loki.ui.utils.ext.toInitials
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(
     viewModel: ReportViewModel,
@@ -192,7 +194,8 @@ fun ReportScreen(
                     }
 
                     Divider(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = .5.dp
                     )
                 }
 
@@ -220,7 +223,8 @@ fun ReportScreen(
                         )
                     )
                     Divider(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = .5.dp
                     )
                 }
             }
@@ -239,7 +243,7 @@ fun ReportScreen(
 
                     ProfileCircleBox(
                         initials = viewModel.localUser.value.name.toInitials(),
-                        backgroundColor = Color(viewModel.profileBackground.value),
+                        backgroundColor = Color(viewModel.localProfile.value.profileBackground),
                         initialsSize = 15,
                         modifier = Modifier.size(30.dp)
                     )
@@ -267,7 +271,7 @@ fun ReportScreen(
                         onClick = {
                             viewModel.addComment()
                         },
-                        enabled = !viewModel.isLoading.value
+                        enabled = !viewModel.isLoading.value && uiState.commentContent.isNotBlank()
                     ) {
                         Text(text = "Comment")
                     }

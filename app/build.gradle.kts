@@ -77,4 +77,5 @@ dependencies {
     kapt(libs.bundles.hilt.kapt)
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
+    implementation(libs.splash.screen)
 }

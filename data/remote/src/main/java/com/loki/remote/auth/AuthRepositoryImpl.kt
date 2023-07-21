@@ -40,9 +40,10 @@ class AuthRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun authenticate(email: String, password: String): String? {
+    override suspend fun authenticate(email: String, password: String): User {
         trace(LOGIN_USER_TRACE) {
-            return auth.signInWithEmailAndPassword(email, password).await()?.user?.uid
+            val user = auth.signInWithEmailAndPassword(email, password).await()?.user
+            return User(id = user!!.uid, username = user.displayName!!, email = user.email!!)
         }
     }
 
@@ -62,13 +63,21 @@ class AuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateUser(name: String, profilePhoto: String) {
+    override suspend fun updateUser(name: String?, profilePhoto: String?) {
         trace(UPDATE_USER_TRACE) {
-            val request = UserProfileChangeRequest.Builder().apply {
-                displayName = name
-                photoUri = profilePhoto.toUri()
-            }.build()
-            auth.currentUser?.updateProfile(request)
+            val request = UserProfileChangeRequest.Builder()
+            if (name != null) {
+                request.apply {
+                    displayName = name
+                }
+            }
+
+            if (profilePhoto != null) {
+                request.apply {
+                    photoUri = profilePhoto.toUri()
+                }
+            }
+            auth.currentUser?.updateProfile(request.build())
         }
     }
 

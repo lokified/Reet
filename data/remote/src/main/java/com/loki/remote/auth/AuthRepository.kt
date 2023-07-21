@@ -11,9 +11,9 @@ interface AuthRepository {
 
     val currentUser: Flow<User>
 
-    suspend fun authenticate(email: String, password: String): String?
+    suspend fun authenticate(email: String, password: String): User
     suspend fun createAccount(names: String, email: String, password: String): String?
-    suspend fun updateUser(name: String, profilePhoto: String)
+    suspend fun updateUser(name: String?, profilePhoto: String?)
     suspend fun sendRecoveryEmail(email: String)
     suspend fun deleteAccount()
     suspend fun signOut()

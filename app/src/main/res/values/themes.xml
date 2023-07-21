@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Reet" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Reet" parent="android:Theme.Material.NoActionBar" />
+
+    <style name="Theme.Reet.NoActionBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.Reet.AppBarOverlay" parent="Theme.Reet.NoActionBar" />
+
+    <style name="Theme.Reet.PopupOverlay" parent="Theme.Reet.NoActionBar" />
 </resources>

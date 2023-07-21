@@ -21,7 +21,7 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val dataStore: DataStoreStorage,
     private val auth: AuthRepository,
-    private val profile: ProfilesRepository
+    private val profileRepository: ProfilesRepository
 ): ReetViewModel(dataStore) {
 
     var state = mutableStateOf(LoginState())
@@ -36,9 +36,10 @@ class LoginViewModel @Inject constructor(
     private val userName
         get() = state.value.userName
 
-    var isProfileComplete = mutableStateOf(false)
-
     var isProfileSheetVisible = mutableStateOf(false)
+    private var localEmail = mutableStateOf("")
+    private var localUsername = mutableStateOf("")
+    private var localProfileBackground = mutableStateOf<Long?>(null)
 
     fun onEmailChange(newValue: String) {
         state.value = state.value.copy(email = newValue.trim())
@@ -55,7 +56,6 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onAppStart(openHomeScreen: () -> Unit) {
-
         viewModelScope.launch {
             dataStore.getUser().collect {
                 if(it.isLoggedIn) {
@@ -93,37 +93,42 @@ class LoginViewModel @Inject constructor(
                 isLoading.value = true
 
                 //logins user
-                val id  = auth.authenticate(
+                val user  = auth.authenticate(
                     email = email,
                     password = password
                 )
 
-                //saves logged in user
-                saveLoggedInUser()
-
                 //checks if user has remote profile
-                getRemoteProfile(id!!)
+                val isProfile = getRemoteProfile(user.id, user.username, user.email)
 
-                delay(3000L)
-                isLoading.value = false
 
-                if (isProfileComplete.value) {
-
-                    //saves logged in user
-                    saveLoggedInUser()
-
-                    //save profile
-                    updateProfile(
-                        LocalProfile(
-                            userName = profileUsername.value,
-                            profileBackground  = profileBackground.value
+                if (isProfile) {
+                    // saves logged in user
+                    updateUser(
+                        LocalUser(
+                            userId = user.id,
+                            email = user.email,
+                            name = user.username,
+                            isLoggedIn = true
                         )
                     )
-                    navigateToHome()
+                    //update local profile
+                    updateProfile(
+                        LocalProfile(
+                            userName = localUsername.value,
+                            profileBackground = localProfileBackground.value!!
+                        )
+                    )
+                    isLoading.value = false
+                    delay(1000L)
                     resetField()
+                    navigateToHome()
                 }
-                else {
+                isLoading.value = false
+
+                if (!isProfile) {
                     isProfileSheetVisible.value = true
+                    return@launchCatching
                 }
             }
             catch (e: FirebaseException) {
@@ -153,13 +158,35 @@ class LoginViewModel @Inject constructor(
             try {
                 isLoading.value = true
 
+                val color = ColorUtil.profileBackgroundColors.random()
+
                 // setsUpProfile
-                profile.setUpProfile(
+                profileRepository.setUpProfile(
                     Profile(
                         userName = userName,
                         name = completeProfileUserName.value,
-                        profileBackgroundColor = ColorUtil.profileBackgroundColors.random(),
+                        profileBackgroundColor = color,
                         userId = userId.value
+                    )
+                )
+
+                delay(1000L)
+                //update local profile
+                updateProfile(
+                    LocalProfile(
+                        userName = userName,
+                        profileBackground = color
+                    )
+                )
+
+                delay(2000L)
+                //saves logged in user
+                updateUser(
+                    LocalUser(
+                        userId = userId.value,
+                        email = localEmail.value,
+                        name = completeProfileUserName.value,
+                        isLoggedIn = true
                     )
                 )
 
@@ -173,38 +200,21 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun getRemoteProfile(id: String) {
-        viewModelScope.launch {
-            val profile  = profile.getProfile(id)
-            userId.value = id
+    private suspend fun getRemoteProfile(id: String, name: String, email: String): Boolean {
 
-            isProfileComplete.value = profile != null
+        val remoteProfile  = profileRepository.getProfile(id)
+        userId.value = id
+        completeProfileUserName.value = name
+        localEmail.value = email
 
-            // also update local profile
-            profile?.let {
-                profileBackground.value = it.profileBackgroundColor ?: 0xFFF1736A
-                profileUsername.value = it.userName
-                completeProfileUserName.value = it.name
-            }
+        if (remoteProfile != null) {
+            localUsername.value = remoteProfile.userName
+            localProfileBackground.value = remoteProfile.profileBackgroundColor
         }
+
+        return remoteProfile != null
     }
 
-    private fun saveLoggedInUser() {
-
-        viewModelScope.launch {
-            auth.currentUser.collect { user ->
-                updateUser(
-                    LocalUser(
-                        userId = user.id,
-                        name = user.username,
-                        email = user.email,
-                        isLoggedIn = true
-                    )
-                )
-                completeProfileUserName.value = user.username
-            }
-        }
-    }
 
     private fun resetField() {
         state.value = LoginState()

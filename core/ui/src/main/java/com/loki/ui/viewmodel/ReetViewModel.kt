@@ -1,5 +1,6 @@
 package com.loki.ui.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,21 +29,20 @@ open class ReetViewModel(
 
     //profile values
     val userInitial = mutableStateOf("")
-    val profileBackground = mutableStateOf(0xFFF1736A)
-    val profileUsername = mutableStateOf("")
+    var localProfile = mutableStateOf(LocalProfile())
 
     fun getUser() {
         launchCatching {
             dataStore.getUser().collect {
-                localUser.value = localUser.value.copy(
+                localUser.value = LocalUser(
                     userId = it.userId,
                     name = it.name,
                     email = it.email,
                     isLoggedIn = it.isLoggedIn,
                 )
 
-                var firstName = ""
-                var lastName = ""
+                var firstName = "R"
+                var lastName = "U"
 
                 if (it.name.isNotBlank()) {
                     val userList = it.name.split(" ")
@@ -55,38 +55,28 @@ open class ReetViewModel(
         }
     }
 
-    fun updateUser(localUser: LocalUser) {
-
+    suspend fun updateUser(localUser: LocalUser) {
         viewModelScope.launch {
-            dataStore.saveUser(
-                LocalUser(
-                    userId = localUser.userId,
-                    name = localUser.name,
-                    email = localUser.email,
-                    isLoggedIn = localUser.isLoggedIn
-                )
-            )
+            dataStore.saveUser(localUser)
         }
     }
 
     fun getLocalProfile() {
         viewModelScope.launch {
             dataStore.getProfile().collect {
-                profileUsername.value = it.userName
-                profileBackground.value = it.profileBackground ?: 0xFFF1736A
+                localProfile.value = LocalProfile(
+                    userName = it.userName,
+                    profileBackground = it.profileBackground
+                )
+                Log.d("profile:reet", it.userName)
+
             }
         }
     }
 
-    fun updateProfile(localProfile: LocalProfile) {
-
+    suspend fun updateProfile(localProfile: LocalProfile) {
         viewModelScope.launch {
-            dataStore.saveProfile(
-                LocalProfile(
-                    userName = localProfile.userName,
-                    profileBackground = localProfile.profileBackground
-                )
-            )
+            dataStore.saveProfile(localProfile)
         }
     }
 }

@@ -9,6 +9,8 @@ class NavigationViewModel: ViewModel() {
     private val _isBottomBarVisible = mutableStateOf(true)
     val isBottomBarVisible : State<Boolean> = _isBottomBarVisible
 
+    val isLoggingIn = mutableStateOf(true)
+
     fun setBottomBarVisible(visible: Boolean) {
         _isBottomBarVisible.value = visible
     }

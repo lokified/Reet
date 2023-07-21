@@ -100,7 +100,7 @@ fun NewReportScreen(
 
         ProfileCircleBox(
             initials = viewModel.userInitial.value,
-            backgroundColor = Color(viewModel.profileBackground.value),
+            backgroundColor = Color(viewModel.localProfile.value.profileBackground),
             initialsSize = 20,
             modifier = Modifier
                 .size(80.dp)

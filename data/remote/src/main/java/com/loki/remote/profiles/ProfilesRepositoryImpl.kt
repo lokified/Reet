@@ -17,31 +17,6 @@ class ProfilesRepositoryImpl @Inject constructor(
     override suspend fun getProfiles(): Flow<List<Profile>> {
         return storage.collection(USER_PROFILE_COLLECTIONS).dataObjects()
     }
-//        callbackFlow {
-//            trySend(Resource.Loading())
-//            val subscription = storage.collection(USER_PROFILE_COLLECTIONS)
-//                .addSnapshotListener { snapshot, error ->
-//
-//                    error?.let { e ->
-//                        trySend(Resource.Error(e.message.toString()))
-//                        cancel(e.message.toString())
-//                    }
-//
-//                    snapshot?.let {
-//                        if (!it.isEmpty) {
-//
-//                            trySend(
-//                                Resource.Success(
-//                                    it.toObjects(Profile::class.java)
-//                                )
-//                            )
-//                        }
-//                    }
-//                }
-//
-//            awaitClose { subscription.remove() }
-//
-//        }
 
     override suspend fun getProfile(userId: String): Profile? {
         val profile: Profile?
@@ -50,7 +25,7 @@ class ProfilesRepositoryImpl @Inject constructor(
             .whereEqualTo(USER_FIELD_ID, userId)
             .get().await().toObjects(Profile::class.java)
 
-        profile = profiles[0]
+        profile = if (profiles.size == 0) null else profiles[0]
 
         Log.d("repo: profile", profile.toString())
 

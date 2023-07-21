@@ -64,9 +64,6 @@ fun LoginScreen(
                 Lifecycle.Event.ON_PAUSE -> {
                     viewModel.errorMessage.value = ""
                 }
-                Lifecycle.Event.ON_CREATE -> {
-                    viewModel.onAppStart(navigateToHome)
-                }
                 else -> {}
             }
         }

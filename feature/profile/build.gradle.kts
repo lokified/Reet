@@ -56,4 +56,7 @@ dependencies {
     implementation(libs.bundles.compose)
     implementation(libs.bundles.hilt)
     kapt(libs.bundles.hilt.kapt)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.bundles.firebase)
+    implementation(libs.coil.kt.compose)
 }

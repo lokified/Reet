@@ -3,6 +3,8 @@ package com.loki.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -30,14 +32,16 @@ import com.loki.report.ReportScreen
 import com.loki.report.ReportViewModel
 import com.loki.settings.SettingsScreen
 import com.loki.ui.utils.Constants.REPORT_ID
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-fun NavGraphBuilder.homeNavGraph(onNavigateToLogin: (Screen) -> Unit) {
+fun NavGraphBuilder.homeNavGraph(viewModel: NavigationViewModel,onNavigateToLogin: (Screen) -> Unit) {
 
     composable(route = Screen.HomeScreen.route) {
 
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val viewModel = NavigationViewModel()
+        //val viewModel = NavigationViewModel()
 
         val bottomBar: @Composable () -> Unit = {
 
@@ -69,14 +73,25 @@ fun NavGraphBuilder.homeNavGraph(onNavigateToLogin: (Screen) -> Unit) {
 }
 
 
-fun NavGraphBuilder.loginScreen(navigateTo: (Screen) -> Unit) {
+fun NavGraphBuilder.loginScreen(viewModel: NavigationViewModel, navigateTo: (Screen) -> Unit) {
+
     composable(route = Screen.LoginScreen.route) {
-        val viewModel = hiltViewModel<LoginViewModel>()
-        LoginScreen(
-            viewModel = viewModel,
-            navigateToRegister = { navigateTo(Screen.RegisterScreen) },
-            navigateToHome = { navigateTo(Screen.HomeScreen.withClearBackStack()) }
-        )
+        val loginViewModel = hiltViewModel<LoginViewModel>()
+        LaunchedEffect(key1 = Unit) {
+            loginViewModel.onAppStart {
+                navigateTo(Screen.HomeScreen.withClearBackStack())
+            }
+            delay(3000L)
+            viewModel.isLoggingIn.value = false
+        }
+
+        if (!viewModel.isLoggingIn.value) {
+            LoginScreen(
+                viewModel = loginViewModel,
+                navigateToRegister = { navigateTo(Screen.RegisterScreen) },
+                navigateToHome = { navigateTo(Screen.HomeScreen.withClearBackStack()) }
+            )
+        }
     }
 }
 
