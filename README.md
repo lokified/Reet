@@ -3,7 +3,7 @@ This is an android app to report emergencies, accidents or any other thing that 
 
 > The app is continuously receiving new features and UI changes. The is the first version of the app.
 
-[Download Apk](https://drive.google.com/file/d/1PC3P0inSWDCii4GUttJUKFBfNjrnXDFn/view?usp=drive_link)
+[Download App](https://drive.google.com/file/d/1BS9H3fnDHzI3K6ONkbuO0BoUGM08nPSr/view?usp=sharing)
 
 #### The app utilizes firebase features.
 * Firebase authentication - this includes login and signup with an email.
