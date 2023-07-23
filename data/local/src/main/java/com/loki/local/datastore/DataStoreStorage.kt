@@ -25,6 +25,7 @@ interface DataStoreStorage {
     }
 
     object ProfilePreference {
+        val PROFILE_ID_KEY = stringPreferencesKey("profile_id_key")
         val USER_USERNAME_KEY = stringPreferencesKey("user_username_key")
         val USER_BACKGROUND_KEY = longPreferencesKey("user_background_key")
     }

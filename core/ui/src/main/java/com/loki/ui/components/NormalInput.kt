@@ -83,3 +83,41 @@ fun NormalInput(
         }
     )
 }
+
+@Composable
+fun BasicTextField(
+    modifier: Modifier = Modifier,
+    placeholder: String,
+    value: String,
+    label: String = "",
+    onValueChange: (String) -> Unit,
+    errorMessage: String,
+    isError: Boolean,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    isEnabled: Boolean = true
+) {
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = {
+            onValueChange(it)
+        },
+        isError = isError,
+        label = {
+            Text(text = label)
+        },
+        placeholder = {
+            Text(text = placeholder)
+        },
+        modifier = modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType
+        ),
+        enabled = isEnabled,
+        supportingText = {
+            if (isError) {
+                Text(text = errorMessage, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+            }
+        }
+    )
+}

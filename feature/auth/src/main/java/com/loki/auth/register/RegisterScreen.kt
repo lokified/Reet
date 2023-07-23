@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -19,9 +20,12 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,11 +41,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.loki.ui.components.BasicTextField
 import com.loki.ui.components.Loading
 import com.loki.ui.components.NormalInput
 import com.loki.ui.components.ProfileSetUpSheet
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel,
@@ -85,26 +90,26 @@ fun RegisterScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                NormalInput(
+                BasicTextField(
                     placeholder = "First Name",
                     label = "First Name",
                     value = uiState.firstName,
                     onValueChange = viewModel::onFirstNameChange,
                     errorMessage = uiState.firstNameError,
                     isError = uiState.isFirstNameError,
-                    leadingIcon = Icons.Filled.AccountCircle,
                     modifier = Modifier.fillMaxWidth(.5f),
                     isEnabled = !viewModel.isLoading.value
                 )
+                
+                Spacer(modifier = Modifier.width(4.dp))
 
-                NormalInput(
+                BasicTextField(
                     placeholder = "Last Name",
                     label = "Last Name",
                     value = uiState.lastName,
                     onValueChange = viewModel::onLastNameChange,
                     errorMessage = uiState.lastNameError,
                     isError = uiState.isLastNameError,
-                    leadingIcon = Icons.Filled.AccountCircle,
                     isEnabled = !viewModel.isLoading.value
                 )
             }
@@ -159,6 +164,11 @@ fun RegisterScreen(
                     viewModel.register(
                         onRegister = {
                             isSheetVisible = true
+                            Toast.makeText(
+                                context,
+                                "Registration Successful",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     )
                 },
@@ -197,20 +207,37 @@ fun RegisterScreen(
                     navigateToLogin = {
                         navigateToLogin()
                         isSheetVisible = false
+                        Toast.makeText(
+                            context,
+                            "Your account setup is successful",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 )
             },
             isEnabled = !viewModel.isLoading.value,
             name = viewModel.completeProfileUserName.value
         ) {
-            NormalInput(
-                label = "Username",
-                placeholder = "Username",
+            OutlinedTextField(
+                label = {
+                    Text(
+                        text = "Username",
+                        color = MaterialTheme.colorScheme.onBackground.copy(.5f)
+                    )
+                },
                 value = uiState.userName,
                 onValueChange = viewModel::onUsernameChange,
-                errorMessage = uiState.userNameError,
-                isError = uiState.isUserNameError,
-                isEnabled = !viewModel.isLoading.value
+                placeholder = {
+                    Text(
+                        text = "Enter username",
+                        color = MaterialTheme.colorScheme.onBackground.copy(.5f)
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !viewModel.isLoading.value,
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(.02f)
+                )
             )
         }
     }

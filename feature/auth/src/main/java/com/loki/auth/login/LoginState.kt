@@ -11,3 +11,9 @@ data class LoginState(
     val isUserNameError: Boolean = false,
     val userNameError: String = "",
 )
+
+data class LocalProfileState(
+    val id: String = "",
+    val username: String = "",
+    val profileBackground: Long? = null
+)

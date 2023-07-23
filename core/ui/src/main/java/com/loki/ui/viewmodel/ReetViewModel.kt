@@ -7,8 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.loki.local.datastore.DataStoreStorage
 import com.loki.local.datastore.model.LocalProfile
 import com.loki.local.datastore.model.LocalUser
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+
 
 open class ReetViewModel(
     private val dataStore: DataStoreStorage

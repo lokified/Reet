@@ -15,8 +15,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +42,7 @@ import com.loki.ui.components.Loading
 import com.loki.ui.components.NormalInput
 import com.loki.ui.components.ProfileSetUpSheet
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
@@ -139,7 +142,16 @@ fun LoginScreen(
             Button(
                 onClick = {
                     keyboardController?.hide()
-                    viewModel.login(navigateToHome)
+                    viewModel.login(
+                        navigateToHome = {
+                            Toast.makeText(
+                                context,
+                                "Login success",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            navigateToHome()
+                        }
+                    )
                 },
                 enabled = !viewModel.isLoading.value,
                 modifier = Modifier
@@ -175,20 +187,37 @@ fun LoginScreen(
                     navigateToHome = {
                         navigateToHome()
                         viewModel.isProfileSheetVisible.value = false
+                        Toast.makeText(
+                            context,
+                            "Your account setup is successful",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 )
             },
             isEnabled = !viewModel.isLoading.value,
             name = viewModel.completeProfileUserName.value
         ) {
-            NormalInput(
-                label = "Username",
-                placeholder = "Username",
+            OutlinedTextField(
+                label = {
+                    Text(
+                        text = "Username",
+                        color = MaterialTheme.colorScheme.onBackground.copy(.5f)
+                    )
+                },
                 value = uiState.userName,
                 onValueChange = viewModel::onUsernameChange,
-                errorMessage = uiState.userNameError,
-                isError = uiState.isUserNameError,
-                isEnabled = !viewModel.isLoading.value
+                placeholder = {
+                    Text(
+                        text = "Enter username",
+                        color = MaterialTheme.colorScheme.onBackground.copy(.5f)
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !viewModel.isLoading.value,
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(.02f)
+                )
             )
         }
     }

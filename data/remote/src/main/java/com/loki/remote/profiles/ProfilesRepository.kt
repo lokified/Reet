@@ -10,4 +10,6 @@ interface ProfilesRepository {
     suspend fun getProfile(userId: String): Profile?
 
     suspend fun setUpProfile(profile: Profile)
+
+    suspend fun updateUsername(profile: Profile)
 }

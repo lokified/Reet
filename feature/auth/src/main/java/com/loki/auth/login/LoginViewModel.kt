@@ -37,9 +37,7 @@ class LoginViewModel @Inject constructor(
         get() = state.value.userName
 
     var isProfileSheetVisible = mutableStateOf(false)
-    private var localEmail = mutableStateOf("")
-    private var localUsername = mutableStateOf("")
-    private var localProfileBackground = mutableStateOf<Long?>(null)
+    private var localProfileState = mutableStateOf(LocalProfileState())
 
     fun onEmailChange(newValue: String) {
         state.value = state.value.copy(email = newValue.trim())
@@ -98,8 +96,10 @@ class LoginViewModel @Inject constructor(
                     password = password
                 )
 
+                completeProfileUserName.value = user.username
+
                 //checks if user has remote profile
-                val isProfile = getRemoteProfile(user.id, user.username, user.email)
+                val isProfile = getRemoteProfile(user.id)
 
 
                 if (isProfile) {
@@ -115,8 +115,9 @@ class LoginViewModel @Inject constructor(
                     //update local profile
                     updateProfile(
                         LocalProfile(
-                            userName = localUsername.value,
-                            profileBackground = localProfileBackground.value!!
+                            id = localProfileState.value.id,
+                            userName = localProfileState.value.username,
+                            profileBackground = localProfileState.value.profileBackground!!
                         )
                     )
                     isLoading.value = false
@@ -171,20 +172,27 @@ class LoginViewModel @Inject constructor(
                 )
 
                 delay(1000L)
+                // get remote profile again to get profile id
+                getRemoteProfile(
+                    id = userId.value,
+                )
+
+                delay(2000L)
                 //update local profile
                 updateProfile(
                     LocalProfile(
+                        id = localProfileState.value.id,
                         userName = userName,
                         profileBackground = color
                     )
                 )
 
-                delay(2000L)
+                delay(3000L)
                 //saves logged in user
                 updateUser(
                     LocalUser(
                         userId = userId.value,
-                        email = localEmail.value,
+                        email = email,
                         name = completeProfileUserName.value,
                         isLoggedIn = true
                     )
@@ -200,16 +208,17 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getRemoteProfile(id: String, name: String, email: String): Boolean {
+    private suspend fun getRemoteProfile(id: String): Boolean {
 
         val remoteProfile  = profileRepository.getProfile(id)
         userId.value = id
-        completeProfileUserName.value = name
-        localEmail.value = email
 
         if (remoteProfile != null) {
-            localUsername.value = remoteProfile.userName
-            localProfileBackground.value = remoteProfile.profileBackgroundColor
+            localProfileState.value = LocalProfileState(
+                id = remoteProfile.id,
+                username = remoteProfile.userName,
+                profileBackground = remoteProfile.profileBackgroundColor
+            )
         }
 
         return remoteProfile != null

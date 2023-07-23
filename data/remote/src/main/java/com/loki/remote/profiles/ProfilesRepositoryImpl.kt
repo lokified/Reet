@@ -1,12 +1,12 @@
 package com.loki.remote.profiles
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.dataObjects
 import com.google.firebase.perf.ktx.trace
 import com.loki.remote.model.Profile
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -25,7 +25,12 @@ class ProfilesRepositoryImpl @Inject constructor(
             .whereEqualTo(USER_FIELD_ID, userId)
             .get().await().toObjects(Profile::class.java)
 
-        profile = if (profiles.size == 0) null else profiles[0]
+        profile = if (profiles.size == 0) {
+            null
+        } else {
+            profileIds.value = profiles[0].id
+            profiles[0]
+        }
 
         Log.d("repo: profile", profile.toString())
 
@@ -40,7 +45,19 @@ class ProfilesRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun updateUsername(profile: Profile) {
+        trace(UPDATE_PROFILE_USERNAME_TRACE) {
+            val profileWithUsername = profile.copy(userName = profile.userName)
+            storage.collection(USER_PROFILE_COLLECTIONS)
+                .document(profileIds.value)
+                .set(profileWithUsername)
+                .await()
+        }
+    }
+
     companion object {
+
+        val profileIds = mutableStateOf("")
 
         //collections
         const val USER_PROFILE_COLLECTIONS = "profile_collections"
@@ -48,5 +65,6 @@ class ProfilesRepositoryImpl @Inject constructor(
 
         //traces
         const val PROFILE_USER_TRACE = "add_profile_trace"
+        const val UPDATE_PROFILE_USERNAME_TRACE = "update_profile_username_trace"
     }
 }
