@@ -50,7 +50,8 @@ The app uses these technologies;
 
 ## Known Bugs
 
-If the app has any bug. Please make contact below.
+If the app has any bug. Please make contact below or open an issue
+> lsheldon645@gmail.com
 
 ## Contacts
 
