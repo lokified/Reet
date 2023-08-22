@@ -52,9 +52,3 @@ The app uses these technologies;
 
 If the app has any bug. Please make contact below or open an issue
 > lsheldon645@gmail.com
-
-## Contacts
-
-Have anything to contribute to the app, send an email to:
-
-> lsheldon645@gmail.com
