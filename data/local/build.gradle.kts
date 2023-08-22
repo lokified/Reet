@@ -40,4 +40,5 @@ dependencies {
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.hilt)
     kapt(libs.bundles.hilt.kapt)
+    implementation(libs.bundles.unitTests)
 }
