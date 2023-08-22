@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.bundles.navigation)
     implementation(libs.bundles.hilt)
     kapt(libs.bundles.hilt.kapt)
+    implementation(libs.bundles.unitTests)
+
 
     implementation(project(":core:ui"))
     implementation(project(":data:local"))
