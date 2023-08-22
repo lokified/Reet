@@ -1,16 +1,16 @@
 # Reet
-This is an android app to report emergencies, accidents or any other thing that one feels like the public should know.
+This is an android app that allows users to login and post images and texts. This can be emergencies, accidents or any other thing that one feels like the public should know.
 
 > The app is continuously receiving new features and UI changes. The is the first version of the app.
 
 [Download App](https://drive.google.com/file/d/1BS9H3fnDHzI3K6ONkbuO0BoUGM08nPSr/view?usp=sharing)
 
 #### The app utilizes firebase features.
-* Firebase authentication - this includes login and signup with an email.
+* Firebase authentication - this includes login and signup with an email and password.
 * Firebase firestore - all the data is stored in the database.
-* Firebase Cloud Messaging - App uses push notification from the firebase sdk that can be used for advertisement and passing information about the app
-* Firebase perfomance - one can monitor the perfomance of the app where it has traces attached to main functions of the app
-* Firebase crashlytics - one can view crash logs of the app
+* Firebase Cloud Messaging - App uses push notification from the firebase sdk that can be used for advertisement and passing information about the app.
+* Firebase performance - one can monitor the performance of the app where it has traces attached to main functions of the app.
+* Firebase crashlytics - one can view crash logs of the app.
   
 ## Demo/screenshots
 <p align="center">
@@ -47,6 +47,7 @@ The app uses these technologies;
 - Splash screen Api - For creating a splash screen on app starting.
 - Datastore - for data persistence in the app
 - Retrofit - make network calls to apis.
+- Mockk - Framework for unit testing on different layers in the app.
 
 ## Known Bugs
 

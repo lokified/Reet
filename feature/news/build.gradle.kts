@@ -54,6 +54,7 @@ dependencies {
     testImplementation(libs.bundles.test.common)
     implementation(libs.bundles.compose)
     implementation(libs.bundles.lifecycle)
+    implementation(libs.bundles.unitTests)
 
     implementation(libs.bundles.hilt)
     kapt(libs.bundles.hilt.kapt)

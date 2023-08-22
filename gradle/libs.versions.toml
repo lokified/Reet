@@ -206,7 +206,7 @@ hilt-kapt = [
 
 coroutines = [
     "coroutine-android",
-    "coroutine-core"
+    "coroutine-core",
 ]
 
 navigation = [
@@ -219,5 +219,6 @@ unitTests = [
     "io-mock",
     "kotlinx-coroutines-test",
     "androidx-arch-core",
-    "junit4"
+    "junit4",
+    "kotlinx-coroutines-test"
 ]
