@@ -45,4 +45,5 @@ dependencies {
     implementation(libs.androidx.datastore)
 
     implementation(libs.bundles.retrofit)
+    implementation(libs.bundles.unitTests)
 }
