@@ -22,7 +22,7 @@ class NewsViewModel @Inject constructor(
         getNews()
     }
 
-    private fun getNews() {
+    fun getNews() {
         viewModelScope.launch {
             newsRepository.getNews().collect { result ->
 
