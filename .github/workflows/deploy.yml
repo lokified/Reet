@@ -2,14 +2,45 @@ name: Deploy Production
 
 on:
   pull_request:
-    types:
-      - opened
+    types: [opened, reopened]
+    branches:
+      - 'master'
+  push:
     branches:
       - 'master'
 
 jobs:
+  build:
+    name: Gradle Build
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Load Google Service file
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo $DATA | base64 -di > app/google-services.json
+
+      - name: Grand execute permissions to gradlew
+        run: chmod +x gradlew
+
+      - name: Build with gradle
+        run: ./gradlew build
+
+
   test:
     name: Unit tests
+    needs: build
+
     runs-on: ubuntu-latest
 
     steps:
