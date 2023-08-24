@@ -79,7 +79,7 @@ jobs:
           fi
 
           next_version="$major.$minor.$patch"
-          echo "::set-output name=next_version::$next_version"
+          echo "name=next_version >>$next_version"
         shell: bash
 
       - name: Create Release
