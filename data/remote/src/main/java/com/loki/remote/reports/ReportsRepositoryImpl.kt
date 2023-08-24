@@ -7,17 +7,18 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import com.loki.remote.util.Resource
 import com.loki.remote.auth.AuthRepository
+import com.loki.remote.comments.CommentsRepositoryImpl
 import com.loki.remote.model.MatchedReport
 import com.loki.remote.model.Profile
 import com.loki.remote.model.Report
 import com.loki.remote.profiles.ProfilesRepository
 import com.loki.remote.util.trace
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -36,28 +37,34 @@ class ReportsRepositoryImpl @Inject constructor(
 
     override suspend fun getReports(): Flow<Resource<List<MatchedReport>>> = callbackFlow {
 
-        CoroutineScope(Dispatchers.IO).launch {
+        launch(Dispatchers.IO) {
             getProfiles()
         }
-            trySend(Resource.Loading())
 
-            val subscription = storage.collection(REPORTS_COLLECTION)
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .addSnapshotListener { snapshot, error ->
-                    error?.let { e ->
-                        trySend(Resource.Error(e.message.toString()))
-                        cancel(e.message.toString())
-                    }
+        trySend(Resource.Loading())
 
-                    snapshot?.let {
+        val subscription = storage.collection(REPORTS_COLLECTION)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                error?.let { e ->
+                    trySend(Resource.Error(e.message.toString()))
+                    cancel(e.message.toString())
+                }
+
+                snapshot?.let {
+
+                    launch(Dispatchers.IO) {
 
                         if (!it.isEmpty) {
 
                             val reports = it.toObjects(Report::class.java)
 
                             val matchedReports = reports.mapNotNull { report ->
+
+                                val numberOfComments = getNumberOfComments(report.id).first()
+
                                 profileList.value?.find { profile -> profile.userId == report.userId }?.let { matchedProfile ->
-                                    MatchedReport(report, matchedProfile)
+                                    MatchedReport(report, matchedProfile, numberOfComments)
                                 }
                             }
 
@@ -67,10 +74,10 @@ class ReportsRepositoryImpl @Inject constructor(
                         }
                     }
                 }
+            }
 
-            awaitClose { subscription.remove() }
-        }
-
+        awaitClose { subscription.remove() }
+    }
 
     override suspend fun addReport(imageUri: Uri?, report: Report) {
         trace(ADD_REPORT_TRACE) {
@@ -96,7 +103,7 @@ class ReportsRepositoryImpl @Inject constructor(
 
     override suspend fun getReport(reportId: String): MatchedReport {
         trace(GET_REPORT_TRACE) {
-            reportIds.value = reportId
+            val numberOfComments = getNumberOfComments(reportId).first()
 
             val report = storage.collection(REPORTS_COLLECTION)
                 .document(reportId)
@@ -108,7 +115,8 @@ class ReportsRepositoryImpl @Inject constructor(
 
             return MatchedReport(
                 report = report!!,
-                profile = matchedProfile!!
+                profile = matchedProfile!!,
+                numberOfComments = numberOfComments
             )
         }
     }
@@ -144,6 +152,21 @@ class ReportsRepositoryImpl @Inject constructor(
             .child(imageName)
             .putFile(imageUri).await()
             .storage.downloadUrl.await()
+    }
+
+    private suspend fun getNumberOfComments(reportId: String): Flow<Int> = callbackFlow {
+
+        val subscription = storage.collection(REPORTS_COLLECTION)
+            .document(CommentsRepositoryImpl.COMMENT)
+            .collection(CommentsRepositoryImpl.COMMENTS_COLLECTION)
+            .whereEqualTo(CommentsRepositoryImpl.REPORT_ID_FIELD, reportId)
+            .addSnapshotListener { snapshot, _ ->
+
+                snapshot?.let {
+                    trySend(it.size())
+                }
+            }
+        awaitClose { subscription.remove() }
     }
 
     companion object {

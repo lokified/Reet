@@ -2,7 +2,6 @@ package com.loki.home.report_list
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,10 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,11 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.loki.ui.components.AppTopBar
-import com.loki.ui.components.Loading
 import com.loki.ui.components.ProfileCircleBox
 import com.loki.ui.components.ReportItem
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportListScreen(
     viewModel: ReportListViewModel,
@@ -66,7 +61,7 @@ fun ReportListScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
+            FloatingActionButton(
                 onClick = navigateToNewReport
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = null)
@@ -79,18 +74,21 @@ fun ReportListScreen(
                 .padding(padding),
         ) {
 
-            LazyColumn(contentPadding = PaddingValues(16.dp)) {
+            LazyColumn {
 
                 items(uiState.matchedReport) { matchedReport ->
 
                     ReportItem(
                         matchedReport = matchedReport,
                         modifier = Modifier.padding(
-                            vertical = 8.dp
+                            vertical = 8.dp,
+                            horizontal = 16.dp
                         ),
                         onItemClick = navigateToReport
                     )
+
                     Spacer(modifier = Modifier.height(8.dp))
+
                     Divider(
                         modifier = Modifier.fillMaxWidth(),
                         thickness = .5.dp
@@ -110,7 +108,7 @@ fun ReportListScreen(
     }
 
     if (uiState.errorMessage.isNotBlank()) {
-        LaunchedEffect(key1 = Unit) {
+        LaunchedEffect(key1 = uiState.errorMessage) {
             Toast.makeText(
                 context,
                 uiState.errorMessage,
