@@ -1,0 +1,103 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
+
+job:
+  apk:
+    name : Generate APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+          cache: 'gradle'
+
+      - name: Load Google Service file
+        env:
+          DATA: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo $DATA | base64 -di > app/google-services.json
+
+      - name: Grand execute permissions to gradlew
+        run: chmod +x gradlew
+
+      - name: Build APK
+        run: bash ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+  release:
+    name: Release APK
+    need: apk
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download APK from build
+        uses: actions/download-artifact@v3
+        with:
+          name: apk
+
+      - name: Extract Existing Version
+        id: extract_version
+        run: |
+          existing_version=$(echo "${{ github.ref }}" | sed 's/v//')
+          echo "::set-output name=existing_version::$existing_version"
+
+      - name: Determine Release
+        id: determine_next_version
+        run: |
+          # Split the existing version (e.g., 1.0.0) into major, minor, and patch components
+          IFS='.' read -ra version_parts <<< "${{ steps.extract_version.outputs.existing_version }}"
+          major="${version_parts[0]}"
+          minor="${version_parts[1]}"
+          patch="${version_parts[2]}"
+          
+          # Check commit messages for keywords
+          commit_messages=$(git log --pretty=%B -n 5)
+          if echo "$commit_messages" | grep -q "MAJOR:"; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+          elif echo "$commit_messages" | grep -q "MINOR:"; then
+            minor=$((minor + 1))
+            patch=0
+          else
+            patch=$((patch + 1))
+          fi
+
+          next_version="$major.$minor.$patch"
+          echo "::set-output name=next_version::$next_version"
+        shell: bash
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.determine_next_version.outputs.next_version }}
+          release_name: ${{ github.event.repository.name }} v${{ steps.determine_next_version.outputs.next_version }}
+
+      - name: Upload Release APK
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: apk/apk-debug.apk
+          asset_name: ${{ github.event.repository.name }}.apk
+          asset_content_type: application/zip
