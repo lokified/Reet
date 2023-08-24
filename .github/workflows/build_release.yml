@@ -41,7 +41,7 @@ jobs:
 
   release:
     name: Release APK
-    need: apk
+    needs: apk
     runs-on: ubuntu-latest
 
     steps:
