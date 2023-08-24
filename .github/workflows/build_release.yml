@@ -7,7 +7,7 @@ on:
     tags:
       - 'v*'
 
-job:
+jobs:
   apk:
     name : Generate APK
     runs-on: ubuntu-latest
