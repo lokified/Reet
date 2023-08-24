@@ -15,6 +15,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +43,16 @@ fun NewsScreen(
         onResult = {}
     )
 
+    if (uiState.errorMessage.isNotBlank()) {
+        LaunchedEffect(key1 = uiState.errorMessage) {
+            Toast.makeText(
+                context,
+                uiState.errorMessage,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     Scaffold(
         topBar = {
             AppTopBar(
@@ -59,6 +70,17 @@ fun NewsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
+            }
+        }
+
+        if (uiState.errorMessage == "check your internet connection") {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                TextButton(onClick = { viewModel.getNews() }) {
+                    Text(text = "retry")
+                }
             }
         }
 
@@ -84,16 +106,6 @@ fun NewsScreen(
                     }
                 }
             }
-        }
-    }
-
-    if (uiState.errorMessage.isNotBlank()) {
-        LaunchedEffect(key1 = Unit) {
-            Toast.makeText(
-                context,
-                uiState.errorMessage,
-                Toast.LENGTH_LONG
-            ).show()
         }
     }
 }
