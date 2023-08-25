@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.loki.ui.components.AppTopBar
+import com.loki.ui.components.ExtendedRowItem
 import com.loki.ui.components.ProfileCircleBox
 import com.loki.ui.utils.ext.toInitials
 
@@ -100,9 +101,9 @@ fun ProfileScreen(
                 )
             }
 
-            ProfileRowItem(content = "Names", subContent = viewModel.localUser.value.name)
-            ProfileRowItem(content = "Email", subContent = viewModel.localUser.value.email)
-            ProfileRowItem(content = "Username", subContent = viewModel.localProfile.value.userName)
+            ExtendedRowItem(content = "Names", subContent = viewModel.localUser.value.name)
+            ExtendedRowItem(content = "Email", subContent = viewModel.localUser.value.email)
+            ExtendedRowItem(content = "Username", subContent = viewModel.localProfile.value.userName)
 
             Text(text = "SETTINGS", modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
 
@@ -110,7 +111,7 @@ fun ProfileScreen(
                 icon = Icons.Filled.Settings,
                 iconBackground = Color(0xFFE33C75),
                 content = "Change settings",
-                onRowClick = {}
+                onRowClick = navigateToSettings
             )
             
             Text(text = "SUPPORT", modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
@@ -220,48 +221,6 @@ fun ProfileBox(
                 color = Color.White,
                 textAlign = TextAlign.Center
             )
-        }
-    }
-}
-
-@Composable
-fun ProfileRowItem(
-    modifier: Modifier = Modifier,
-    content: String,
-    subContent: String,
-    isEditable: Boolean = false,
-    onRowClick: () -> Unit = {}
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable {
-                if (isEditable) {
-                    onRowClick()
-                }
-            }
-    ) {
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(
-                horizontal = 16.dp,
-                vertical = 12.dp
-            )
-        ) {
-
-            Column {
-                Text(text = content, fontSize = 16.sp)
-                Text(text = subContent, fontSize = 14.sp, color = MaterialTheme.colorScheme.onBackground.copy(.5f))
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            if (isEditable) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowForwardIos,
-                    contentDescription = "forward_icon"
-                )
-            }
         }
     }
 }

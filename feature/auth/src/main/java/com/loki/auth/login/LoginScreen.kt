@@ -15,11 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -43,7 +41,7 @@ import com.loki.ui.components.NormalInput
 import com.loki.ui.components.ProfileSetUpSheet
 import com.loki.ui.utils.TextFieldColorUtil.colors
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
@@ -52,6 +50,7 @@ fun LoginScreen(
 ) {
 
     val uiState by viewModel.state
+    val isDarkTheme by viewModel.isDarkTheme
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
@@ -110,7 +109,8 @@ fun LoginScreen(
                 errorMessage = uiState.emailError,
                 isError = uiState.isEmailError,
                 leadingIcon = Icons.Filled.Email,
-                isEnabled = !viewModel.isLoading.value
+                isEnabled = !viewModel.isLoading.value,
+                isDarkTheme = isDarkTheme
             )
 
             NormalInput(
@@ -122,7 +122,8 @@ fun LoginScreen(
                 isError = uiState.isPasswordError,
                 leadingIcon = Icons.Filled.Lock,
                 keyboardType = KeyboardType.Password,
-                isEnabled = !viewModel.isLoading.value
+                isEnabled = !viewModel.isLoading.value,
+                isDarkTheme = isDarkTheme
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -212,7 +213,7 @@ fun LoginScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !viewModel.isLoading.value,
-                colors = colors()
+                colors = colors(isDarkTheme)
             )
         }
     }

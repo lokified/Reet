@@ -32,6 +32,7 @@ import com.loki.profile.ProfileViewModel
 import com.loki.report.ReportScreen
 import com.loki.report.ReportViewModel
 import com.loki.settings.SettingsScreen
+import com.loki.settings.SettingsViewModel
 import com.loki.ui.utils.Constants.REPORT_ID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ fun NavGraphBuilder.homeNavGraph(viewModel: NavigationViewModel,onNavigateToLogi
 
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-        //val viewModel = NavigationViewModel()
+        val settingsViewModel = hiltViewModel<SettingsViewModel>()
 
         val bottomBar: @Composable () -> Unit = {
 
@@ -54,7 +55,8 @@ fun NavGraphBuilder.homeNavGraph(viewModel: NavigationViewModel,onNavigateToLogi
                 ),
                 onNavigateTo = navController::navigateTo,
                 currentDestination = navBackStackEntry?.destination,
-                isVisible = viewModel.isBottomBarVisible.value
+                isVisible = viewModel.isBottomBarVisible.value,
+                isDarkTheme = settingsViewModel.isDarkTheme.value
             )
         }
 
@@ -210,8 +212,10 @@ fun NavGraphBuilder.settingsScreen(onNavigateBack: () -> Unit, viewModel: Naviga
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(false)
         }
+        val settingsViewModel = hiltViewModel<SettingsViewModel>()
         SettingsScreen(
-            navigateBack = onNavigateBack
+            navigateBack = onNavigateBack,
+            viewModel = settingsViewModel
         )
     }
 }

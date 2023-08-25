@@ -1,7 +1,6 @@
 package com.loki.auth.register
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,16 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,7 +42,7 @@ import com.loki.ui.components.NormalInput
 import com.loki.ui.components.ProfileSetUpSheet
 import com.loki.ui.utils.TextFieldColorUtil.colors
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel,
@@ -55,6 +50,7 @@ fun RegisterScreen(
 ) {
 
     val uiState by viewModel.state
+    val isDarkTheme by viewModel.isDarkTheme
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
@@ -99,7 +95,8 @@ fun RegisterScreen(
                     errorMessage = uiState.firstNameError,
                     isError = uiState.isFirstNameError,
                     modifier = Modifier.fillMaxWidth(.5f),
-                    isEnabled = !viewModel.isLoading.value
+                    isEnabled = !viewModel.isLoading.value,
+                    isDarkTheme = isDarkTheme
                 )
                 
                 Spacer(modifier = Modifier.width(4.dp))
@@ -111,7 +108,8 @@ fun RegisterScreen(
                     onValueChange = viewModel::onLastNameChange,
                     errorMessage = uiState.lastNameError,
                     isError = uiState.isLastNameError,
-                    isEnabled = !viewModel.isLoading.value
+                    isEnabled = !viewModel.isLoading.value,
+                    isDarkTheme = isDarkTheme
                 )
             }
 
@@ -123,7 +121,8 @@ fun RegisterScreen(
                 errorMessage = uiState.emailError,
                 isError = uiState.isEmailError,
                 leadingIcon = Icons.Filled.Email,
-                isEnabled = !viewModel.isLoading.value
+                isEnabled = !viewModel.isLoading.value,
+                isDarkTheme = isDarkTheme
             )
 
             NormalInput(
@@ -135,7 +134,8 @@ fun RegisterScreen(
                 isError = uiState.isPasswordError,
                 leadingIcon = Icons.Filled.Lock,
                 keyboardType = KeyboardType.Password,
-                isEnabled = !viewModel.isLoading.value
+                isEnabled = !viewModel.isLoading.value,
+                isDarkTheme = isDarkTheme
             )
 
             NormalInput(
@@ -147,7 +147,8 @@ fun RegisterScreen(
                 isError = uiState.isConPasswordError,
                 leadingIcon = Icons.Filled.Lock,
                 keyboardType = KeyboardType.Password,
-                isEnabled = !viewModel.isLoading.value
+                isEnabled = !viewModel.isLoading.value,
+                isDarkTheme = isDarkTheme
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -227,7 +228,7 @@ fun RegisterScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !viewModel.isLoading.value,
-                colors = colors()
+                colors = colors(isDarkTheme)
             )
         }
     }

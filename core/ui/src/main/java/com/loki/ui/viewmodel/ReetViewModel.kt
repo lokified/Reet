@@ -19,6 +19,9 @@ open class ReetViewModel(
     private val dataStore: DataStoreStorage
     ): ViewModel() {
 
+    // app theme
+    val isDarkTheme = mutableStateOf(true)
+
     fun launchCatching(block: suspend CoroutineScope.() -> Unit) =
         viewModelScope.launch(
             block = block
@@ -35,6 +38,10 @@ open class ReetViewModel(
     //profile values
     val userInitial = mutableStateOf("")
     var localProfile = mutableStateOf(LocalProfile())
+
+    init {
+        getAppTheme()
+    }
 
     fun getUser() {
         launchCatching {
@@ -82,6 +89,14 @@ open class ReetViewModel(
     suspend fun updateProfile(localProfile: LocalProfile) {
         viewModelScope.launch {
             dataStore.saveProfile(localProfile)
+        }
+    }
+
+    private fun getAppTheme() {
+        viewModelScope.launch {
+            dataStore.getAppTheme().collect {
+                isDarkTheme.value = it
+            }
         }
     }
 }

@@ -5,9 +5,11 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,7 +26,8 @@ fun BottomNavigation(
     screens: List<Screen>,
     onNavigateTo: (Screen) -> Unit,
     currentDestination: NavDestination?,
-    isVisible: Boolean
+    isVisible: Boolean,
+    isDarkTheme: Boolean
 ) {
 
     AnimatedVisibility(
@@ -33,7 +36,10 @@ fun BottomNavigation(
         exit = slideOutVertically(targetOffsetY = { it })
     ) {
 
-        AppBottomBar {
+        AppBottomBar(
+            containerColor = if (!isDarkTheme) MaterialTheme.colorScheme.background
+            else MaterialTheme.colorScheme.primary
+        ) {
 
             screens.forEach { screen ->
 

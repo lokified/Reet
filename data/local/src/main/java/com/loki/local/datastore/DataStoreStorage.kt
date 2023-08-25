@@ -17,6 +17,10 @@ interface DataStoreStorage {
 
     suspend fun getProfile(): Flow<LocalProfile>
 
+    suspend fun saveAppTheme(isDarkTheme: Boolean)
+
+    suspend fun getAppTheme(): Flow<Boolean>
+
     object UserPreferences {
         val USER_ID_KEY = stringPreferencesKey("user_id_key")
         val USER_NAME_KEY = stringPreferencesKey("user_name_key")
@@ -28,5 +32,9 @@ interface DataStoreStorage {
         val PROFILE_ID_KEY = stringPreferencesKey("profile_id_key")
         val USER_USERNAME_KEY = stringPreferencesKey("user_username_key")
         val USER_BACKGROUND_KEY = longPreferencesKey("user_background_key")
+    }
+
+    object ThemePreference {
+        val IS_DARK_THEME_KEY = booleanPreferencesKey("is_dark_theme_key")
     }
 }

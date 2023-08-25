@@ -134,11 +134,11 @@ fun NewReportScreen(
                     .focusRequester(focusRequester),
                 enabled = !viewModel.isLoading.value,
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(.2f)
+                    containerColor = if (viewModel.isDarkTheme.value) MaterialTheme.colorScheme.primary.copy(.2f)
                         else MaterialTheme.colorScheme.primary.copy(.05f),
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onBackground
+                    cursorColor = if (viewModel.isDarkTheme.value) MaterialTheme.colorScheme.onBackground
                         else MaterialTheme.colorScheme.primary
                 ),
             )

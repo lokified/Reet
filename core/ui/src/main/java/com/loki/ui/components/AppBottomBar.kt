@@ -7,11 +7,13 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun AppBottomBar(
     modifier: Modifier = Modifier,
+    containerColor: Color,
     content: @Composable RowScope.() -> Unit
 ) {
 
@@ -19,8 +21,7 @@ fun AppBottomBar(
         modifier = modifier,
         tonalElevation = 4.dp,
         content = content,
-        containerColor = if (!isSystemInDarkTheme()) MaterialTheme.colorScheme.background
-            else MaterialTheme.colorScheme.primary
+        containerColor = containerColor
     )
 }
 

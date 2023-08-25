@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import com.loki.local.datastore.DataStoreStorage.ProfilePreference.PROFILE_ID_KEY
 import com.loki.local.datastore.DataStoreStorage.ProfilePreference.USER_BACKGROUND_KEY
 import com.loki.local.datastore.DataStoreStorage.ProfilePreference.USER_USERNAME_KEY
+import com.loki.local.datastore.DataStoreStorage.ThemePreference.IS_DARK_THEME_KEY
 import com.loki.local.datastore.DataStoreStorage.UserPreferences.USER_EMAIL_KEY
 import com.loki.local.datastore.DataStoreStorage.UserPreferences.USER_ID_KEY
 import com.loki.local.datastore.DataStoreStorage.UserPreferences.USER_LOGGEDIN_KEY
@@ -58,6 +59,18 @@ class DataStoreStorageImpl @Inject constructor(
             val background = preferences[USER_BACKGROUND_KEY] ?: 0xFFF1736A
 
             LocalProfile(id, username, background)
+        }
+    }
+
+    override suspend fun saveAppTheme(isDarkTheme: Boolean) {
+        datastore.edit { preference ->
+            preference[IS_DARK_THEME_KEY] = isDarkTheme
+        }
+    }
+
+    override suspend fun getAppTheme(): Flow<Boolean> {
+        return datastore.data.map { preferences ->
+            preferences[IS_DARK_THEME_KEY] ?: true
         }
     }
 }
