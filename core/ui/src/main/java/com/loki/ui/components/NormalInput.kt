@@ -1,5 +1,6 @@
 package com.loki.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -12,6 +13,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,8 +27,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.loki.ui.utils.TextFieldColorUtil.colors
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NormalInput(
     modifier: Modifier = Modifier,
@@ -80,7 +83,8 @@ fun NormalInput(
             if (isError) {
                 Text(text = errorMessage, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
             }
-        }
+        },
+        colors = colors()
     )
 }
 
@@ -118,6 +122,7 @@ fun BasicTextField(
             if (isError) {
                 Text(text = errorMessage, color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
             }
-        }
+        },
+        colors = colors()
     )
 }

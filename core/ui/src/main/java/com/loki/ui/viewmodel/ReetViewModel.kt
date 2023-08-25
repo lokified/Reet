@@ -9,6 +9,8 @@ import com.loki.local.datastore.model.LocalProfile
 import com.loki.local.datastore.model.LocalUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

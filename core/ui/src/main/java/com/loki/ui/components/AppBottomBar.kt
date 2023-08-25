@@ -1,6 +1,8 @@
 package com.loki.ui.components
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
@@ -16,7 +18,9 @@ fun AppBottomBar(
     NavigationBar(
         modifier = modifier,
         tonalElevation = 4.dp,
-        content = content
+        content = content,
+        containerColor = if (!isSystemInDarkTheme()) MaterialTheme.colorScheme.background
+            else MaterialTheme.colorScheme.primary
     )
 }
 

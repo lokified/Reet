@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -133,9 +134,12 @@ fun NewReportScreen(
                     .focusRequester(focusRequester),
                 enabled = !viewModel.isLoading.value,
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(.02f),
+                    containerColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.primary.copy(.2f)
+                        else MaterialTheme.colorScheme.primary.copy(.05f),
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = if (isSystemInDarkTheme()) MaterialTheme.colorScheme.onBackground
+                        else MaterialTheme.colorScheme.primary
                 ),
             )
 

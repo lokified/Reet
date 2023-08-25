@@ -120,7 +120,8 @@ fun ReportItem(
                 Text(
                     text = matchedReport.numberOfComments.toString() + " comments",
                     fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(.5f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(.5f),
+                    modifier = Modifier.clickable { onItemClick(report.id) }
                 )
             }
 

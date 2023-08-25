@@ -41,6 +41,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.loki.ui.components.Loading
 import com.loki.ui.components.NormalInput
 import com.loki.ui.components.ProfileSetUpSheet
+import com.loki.ui.utils.TextFieldColorUtil.colors
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -111,8 +112,6 @@ fun LoginScreen(
                 leadingIcon = Icons.Filled.Email,
                 isEnabled = !viewModel.isLoading.value
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             NormalInput(
                 placeholder = "Password",
@@ -201,23 +200,19 @@ fun LoginScreen(
             OutlinedTextField(
                 label = {
                     Text(
-                        text = "Username",
-                        color = MaterialTheme.colorScheme.onBackground.copy(.5f)
+                        text = "Username"
                     )
                 },
                 value = uiState.userName,
                 onValueChange = viewModel::onUsernameChange,
                 placeholder = {
                     Text(
-                        text = "Enter username",
-                        color = MaterialTheme.colorScheme.onBackground.copy(.5f)
+                        text = "Enter username"
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !viewModel.isLoading.value,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(.02f)
-                )
+                colors = colors()
             )
         }
     }
