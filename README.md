@@ -11,16 +11,17 @@ This is an android app that allows users to login and post images and texts. Thi
 * Firebase Cloud Messaging - App uses push notification from the firebase sdk that can be used for advertisement and passing information about the app.
 * Firebase performance - one can monitor the performance of the app where it has traces attached to main functions of the app.
 * Firebase crashlytics - one can view crash logs of the app.
-  
+
 ## Demo/screenshots
 <p align="center">
-<img src="https://github.com/lokified/Reet/assets/87479198/62fb6c54-6a0b-4ad1-8100-0b518426f275" width=30% height=30% >
-<img src="https://github.com/lokified/Reet/assets/87479198/3db3a3f4-e05d-4211-a3af-eafb609dc944" width=30% height=30% >
-<img src="https://github.com/lokified/Reet/assets/87479198/8cd0f7ba-8502-47a2-9ad8-b01d65ebb795" width=30% height=30% >
-<img src="https://github.com/lokified/Reet/assets/87479198/92062344-c8f1-48d3-971f-41f8ce9af438" width=30% height=30% >
-<img src="https://github.com/lokified/Reet/assets/87479198/d21e1394-f1c8-4a48-acaa-f0d26da23156" width=30% height=30% >
-<img src="https://github.com/lokified/Reet/assets/87479198/0baacc80-0b01-4e67-9b3d-f92edcfb29d2" width=30% height=30% >
-<img src="https://github.com/lokified/Reet/assets/87479198/4c6b522d-c92f-4261-978e-ccadf5bb8c5a" width=30% height=30% >
+<img src="https://github.com/lokified/Reet/assets/87479198/0429cbcc-37a0-4663-bc5b-60b4b929e0e3" width=20% height=30% >
+<img src="https://github.com/lokified/Reet/assets/87479198/fb26acbf-f2cf-4ddf-883d-d0454dc4693f" width=20% height=30% >
+<img src="https://github.com/lokified/Reet/assets/87479198/8c7bdb84-7b5e-4734-b626-9f913a2d960e" width=20% height=30% >
+<img src="https://github.com/lokified/Reet/assets/87479198/7c6e6001-0164-4e5e-b9e9-dc0f8fe440458" width=20% height=30% >
+<img src="https://github.com/lokified/Reet/assets/87479198/b50206c2-0bf0-436b-bef4-5c5860848cf6" width=20% height=30% >
+<img src="https://github.com/lokified/Reet/assets/87479198/159f07fd-cf80-42b5-8ee5-2d49d5f2e062" width=20% height=30% >
+<img src="https://github.com/lokified/Reet/assets/87479198/5664e578-d339-43e2-9ae4-9621673b7b23" width=20% height=30% >
+<img src="https://github.com/lokified/Reet/assets/87479198/0335005d-ff32-450f-9142-9268127b4b1b" width=20% height=30% >
 </p>
 
 
