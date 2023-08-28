@@ -3,7 +3,7 @@ This is an android app that allows users to login and post images and texts. Thi
 
 > The app is continuously receiving new features and UI changes. The is the first version of the app.
 
-[Download App](https://drive.google.com/file/d/1BS9H3fnDHzI3K6ONkbuO0BoUGM08nPSr/view?usp=sharing)
+[Download App in the latest release here](https://github.com/lokified/Reet/releases)
 
 #### The app utilizes firebase features.
 * Firebase authentication - this includes login and signup with an email and password.
