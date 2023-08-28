@@ -26,14 +26,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +50,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.loki.ui.components.AppTopBar
 import com.loki.ui.components.CommentItem
+import com.loki.ui.components.EditDeleteBottomSheet
+import com.loki.ui.components.EditTextFieldSheet
 import com.loki.ui.components.ProfileCircleBox
 import com.loki.ui.utils.DateUtil.formatDate
 import com.loki.ui.utils.DateUtil.formatTime
@@ -57,12 +61,16 @@ import com.loki.ui.utils.ext.toInitials
 @Composable
 fun ReportScreen(
     viewModel: ReportViewModel,
-    onNavigateBack: () -> Unit
+    navigateBack: () -> Unit
 ) {
 
     val uiState by viewModel.state
     val comments by viewModel.commentState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var isReportMoreClicked by rememberSaveable { mutableStateOf(false) }
+    var isCommentMoreClicked by rememberSaveable { mutableStateOf(false) }
+    var isEditReportClicked by remember { mutableStateOf(false) }
+    var isEditCommentClicked by remember { mutableStateOf(false) }
 
     if (viewModel.errorMessage.value.isNotBlank()) {
         LaunchedEffect(key1 = viewModel.errorMessage.value) {
@@ -74,12 +82,85 @@ fun ReportScreen(
         }
     }
 
+    if (isReportMoreClicked) {
+        EditDeleteBottomSheet(
+            onDismiss = {
+                isReportMoreClicked = false
+            },
+            onEditClick = {
+                isEditReportClicked = true
+                isReportMoreClicked = false
+            },
+            onDeleteClick = {
+                viewModel.deleteReport(
+                    navigateBack = navigateBack
+                )
+                isReportMoreClicked = false
+            }
+        )
+    }
+
+    if (isCommentMoreClicked) {
+        EditDeleteBottomSheet(
+            onDismiss = {
+                isCommentMoreClicked = false
+            },
+            onEditClick = {
+                isEditCommentClicked = true
+                isCommentMoreClicked = false
+            },
+            onDeleteClick = {
+                viewModel.deleteComment()
+                isCommentMoreClicked = false
+            }
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
 
+        if (isEditReportClicked) {
+            EditTextFieldSheet(
+                modifier = Modifier.fillMaxSize(),
+                value = viewModel.editableReport.value.reportContent,
+                onValueChange = viewModel::onReportChange,
+                isDarkTheme = viewModel.isDarkTheme.value,
+                isEnabled = !viewModel.isLoading.value,
+                onComplete = {
+                    viewModel.editReport(
+                        onSuccess = {
+                            isEditReportClicked = false
+                        }
+                    )
+                },
+                onDismiss = {
+                    isEditReportClicked = false
+                }
+            )
+        }
+
+        if (isEditCommentClicked) {
+            EditTextFieldSheet(
+                modifier = Modifier.fillMaxSize(),
+                value = viewModel.editableComment.value.commentContent,
+                onValueChange = viewModel::onCommentContentChange,
+                isDarkTheme = viewModel.isDarkTheme.value,
+                isEnabled = !viewModel.isLoading.value,
+                onComplete = {
+                    viewModel.editComment(
+                        onSuccess = {
+                            isEditCommentClicked = false
+                        }
+                    )
+                },
+                onDismiss = {
+                    isEditCommentClicked = false
+                }
+            )
+        }
 
         AppTopBar(
             leadingItem = {
-                IconButton(onClick = onNavigateBack) {
+                IconButton(onClick = navigateBack) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Arrow_back"
@@ -126,8 +207,13 @@ fun ReportScreen(
 
                             Spacer(modifier = Modifier.weight(1f))
 
-                            IconButton(onClick = { /*TODO*/ }) {
-                                Icon(imageVector = Icons.Filled.MoreHoriz, contentDescription = "more")
+                            if (viewModel.localUser.value.userId == viewModel.editableReport.value.userId) {
+                                IconButton(onClick = { isReportMoreClicked = true }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.MoreHoriz,
+                                        contentDescription = "more"
+                                    )
+                                }
                             }
                         }
                     }
@@ -219,7 +305,11 @@ fun ReportScreen(
 
                     CommentItem(
                         matchedComment = matchedComment,
-                        onMoreClick = {},
+                        onMoreClick = {
+                            isCommentMoreClicked = true
+                            viewModel.onCommentIdChange(matchedComment.comment)
+                                      },
+                        isUserMatched = viewModel.localUser.value.userId == matchedComment.comment.userId,
                         modifier = Modifier.padding(
                             vertical = 4.dp,
                             horizontal = 16.dp

@@ -4,10 +4,12 @@ import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.ktx.dataObjects
 import com.google.firebase.storage.FirebaseStorage
 import com.loki.remote.util.Resource
 import com.loki.remote.auth.AuthRepository
 import com.loki.remote.comments.CommentsRepositoryImpl
+import com.loki.remote.model.Comment
 import com.loki.remote.model.MatchedReport
 import com.loki.remote.model.Profile
 import com.loki.remote.model.Report
@@ -103,6 +105,9 @@ class ReportsRepositoryImpl @Inject constructor(
 
     override suspend fun getReport(reportId: String): MatchedReport {
         trace(GET_REPORT_TRACE) {
+
+            reportIds.value = reportId
+
             val numberOfComments = getNumberOfComments(reportId).first()
 
             val report = storage.collection(REPORTS_COLLECTION)
@@ -132,9 +137,29 @@ class ReportsRepositoryImpl @Inject constructor(
 
     override suspend fun deleteReport() {
         trace(DELETE_REPORT_TRACE) {
+
+            // delete report item
             storage.collection(REPORTS_COLLECTION)
                 .document(reportIds.value)
                 .delete().await()
+
+            // also delete its comments
+            val commentsListFlow  = storage.collection(CommentsRepositoryImpl.REPORTS_COLLECTION)
+                .document(CommentsRepositoryImpl.COMMENT)
+                .collection(CommentsRepositoryImpl.COMMENTS_COLLECTION)
+                .whereEqualTo(CommentsRepositoryImpl.REPORT_ID_FIELD, reportIds.value)
+                .dataObjects<Comment>()
+
+            val comments = commentsListFlow.first()
+
+            for (comment in comments) {
+                storage.collection(CommentsRepositoryImpl.REPORTS_COLLECTION)
+                    .document(CommentsRepositoryImpl.COMMENT)
+                    .collection(CommentsRepositoryImpl.COMMENTS_COLLECTION)
+                    .document(comment.id)
+                    .delete()
+                    .await()
+            }
         }
     }
 

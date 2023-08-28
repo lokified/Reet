@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.FirebaseException
 import com.loki.local.datastore.DataStoreStorage
 import com.loki.local.datastore.model.LocalProfile
 import com.loki.local.datastore.model.LocalUser
@@ -23,9 +24,16 @@ open class ReetViewModel(
     val isDarkTheme = mutableStateOf(true)
 
     fun launchCatching(block: suspend CoroutineScope.() -> Unit) =
-        viewModelScope.launch(
-            block = block
-        )
+        viewModelScope.launch {
+            try {
+                isLoading.value = true
+                block()
+                isLoading.value = false
+            } catch (e: FirebaseException) {
+                isLoading.value = false
+                errorMessage.value = e.message ?: "Something went wrong"
+            }
+        }
 
     var errorMessage = mutableStateOf("")
     var isLoading = mutableStateOf(false)
@@ -44,7 +52,7 @@ open class ReetViewModel(
     }
 
     fun getUser() {
-        launchCatching {
+        viewModelScope.launch {
             dataStore.getUser().collect {
                 localUser.value = LocalUser(
                     userId = it.userId,

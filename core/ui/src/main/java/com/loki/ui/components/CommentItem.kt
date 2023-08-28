@@ -33,6 +33,7 @@ import com.loki.ui.utils.ext.toInitials
 fun CommentItem(
     modifier: Modifier = Modifier,
     matchedComment: MatchedComment,
+    isUserMatched: Boolean,
     onMoreClick: () -> Unit
 ) {
 
@@ -71,12 +72,15 @@ fun CommentItem(
                         modifier = Modifier.padding(top = 4.dp),
                         color = MaterialTheme.colorScheme.onBackground.copy(.5f)
                     )
-                    Icon(
-                        imageVector = Icons.Filled.MoreVert,
-                        contentDescription = "More",
-                        modifier = Modifier.padding(4.dp)
-                            .clickable { onMoreClick() }
-                    )
+
+                    if (isUserMatched) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = "More",
+                            modifier = Modifier.padding(4.dp)
+                                .clickable { onMoreClick() }
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))

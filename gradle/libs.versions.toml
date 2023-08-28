@@ -1,18 +1,19 @@
 [versions]
-androidGradlePlugin = "8.0.1"
+
+androidGradlePlugin = "8.0.2"
 androidxActivity = "1.7.2"
-androidxComposeBom = "2023.01.00"
+androidxComposeBom = "2023.06.01"
 androidxComposeCompiler = "1.4.4"
 androidxCore = "1.10.1"
-androidxComposeMaterial3 = "1.1.0"
+androidxComposeMaterial3 = "1.1.1"
 androidxCoreSplashscreen = "1.0.1"
 androidxEspresso = "3.5.1"
 androidxLifecycle = "2.6.1"
-androidxNavigation = "2.6.0"
+androidxNavigation = "2.7.1"
 androidxTestCore = "1.5.0"
 androidxTestExt = "1.1.5"
 androidxTestRules = "1.5.0"
-androidxTestRunner = "1.5.1"
+androidxTestRunner = "1.5.2"
 androidxDataStore = "1.0.0"
 junit4 = "4.13.2"
 kotlin = "1.8.21"
@@ -27,7 +28,7 @@ hiltNavigation = "1.0.0"
 palette = "1.0.0"
 googleGson = "2.9.0"
 collapsingToolBar = "1.1.9"
-constraintLayout = "1.1.0-alpha09"
+constraintLayout = "1.1.0"
 firebaseBom = "32.2.2"
 googleServices = "4.3.15"
 firebasePerf = "1.4.2"
@@ -35,7 +36,6 @@ firebaseCrash = "2.9.6"
 kotlinxPlayService = "1.6.4"
 ktlint = "11.0.0"
 spotless = "6.19.0"
-material-alpha = "1.2.0-alpha02"
 archCoreTest = "2.2.0"
 mockk = "1.10.5"
 mockito = "3.2.0"
@@ -47,7 +47,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material-alpha" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-compose-material3-windowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class", version.ref = "androidxComposeMaterial3" }
 androidx-compose-ui-ui= { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
@@ -133,7 +133,7 @@ androidx-compose-ui-testManifest = { group = "androidx.compose.ui", name = "ui-t
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
-kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-perfomance = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerf" }
@@ -219,6 +219,5 @@ unitTests = [
     "io-mock",
     "kotlinx-coroutines-test",
     "androidx-arch-core",
-    "junit4",
     "kotlinx-coroutines-test"
 ]

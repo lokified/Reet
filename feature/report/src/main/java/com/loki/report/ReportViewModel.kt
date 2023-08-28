@@ -2,11 +2,12 @@ package com.loki.report
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
-import com.google.firebase.FirebaseException
+import androidx.lifecycle.viewModelScope
 import com.loki.local.datastore.DataStoreStorage
 import com.loki.remote.util.Resource
 import com.loki.remote.comments.CommentsRepository
 import com.loki.remote.model.Comment
+import com.loki.remote.model.Report
 import com.loki.remote.reports.ReportsRepository
 import com.loki.ui.utils.Constants.REPORT_ID
 import com.loki.ui.utils.DateUtil
@@ -14,6 +15,7 @@ import com.loki.ui.viewmodel.ReetViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,6 +38,9 @@ class ReportViewModel @Inject constructor(
     private val _commentState = MutableStateFlow(CommentState())
     val commentState = _commentState.asStateFlow()
 
+    val editableReport = mutableStateOf(Report())
+    val editableComment = mutableStateOf(Comment())
+
     init {
         getLocalProfile()
         getUser()
@@ -51,23 +56,15 @@ class ReportViewModel @Inject constructor(
 
     private fun getReport(reportId: String) {
         launchCatching {
-            try {
-                isLoading.value = true
-
-                state.value = state.value.copy(
-                    matchedReport = reports.getReport(reportId)
-                )
-
-                isLoading.value = false
-            } catch (e: FirebaseException) {
-                isLoading.value = false
-                errorMessage.value = e.message ?: "Something went wrong"
-            }
+            state.value = state.value.copy(
+                matchedReport = reports.getReport(reportId)
+            )
+            editableReport.value = matchedReport!!.report
         }
     }
 
     private fun getComments(reportId: String) {
-        launchCatching {
+        viewModelScope.launch {
             comments.getComments(reportId).collect { result ->
 
                 when(result) {
@@ -93,29 +90,67 @@ class ReportViewModel @Inject constructor(
 
     fun addComment() {
         launchCatching {
-            try {
-                isLoading.value = true
-
-                comments.addComment(
-                    Comment(
-                        commentContent = commentContent,
-                        createdAt = System.currentTimeMillis(),
-                        createdOn = DateUtil.getCurrentDate(),
-                        userId = localUser.value.userId,
-                        reportId = matchedReport!!.report.id
-                    )
+            comments.addComment(
+                Comment(
+                    commentContent = commentContent,
+                    createdAt = System.currentTimeMillis(),
+                    createdOn = DateUtil.getCurrentDate(),
+                    userId = localUser.value.userId,
+                    reportId = matchedReport!!.report.id
                 )
-
-                isLoading.value = false
-                resetField()
-            } catch (e: FirebaseException) {
-                isLoading.value = false
-                errorMessage.value = e.message ?: "Something went wrong"
-            }
+            )
+            resetField()
         }
     }
 
     private fun resetField() {
         state.value = state.value.copy(commentContent = "")
+    }
+
+    fun onReportChange(reportContent: String) {
+        editableReport.value = editableReport.value.copy(
+            reportContent = reportContent
+        )
+    }
+
+    fun editReport(onSuccess: () -> Unit) {
+        launchCatching {
+            reports.editReport(
+                editableReport.value
+            )
+            onSuccess()
+        }
+    }
+
+    fun deleteReport(navigateBack: () -> Unit) {
+        launchCatching {
+            reports.deleteReport()
+            navigateBack()
+        }
+    }
+
+    fun onCommentIdChange(comment: Comment) {
+        editableComment.value = comment
+    }
+
+    fun onCommentContentChange(newValue: String) {
+        editableComment.value = editableComment.value.copy(
+            commentContent = newValue
+        )
+    }
+
+    fun editComment(onSuccess: () -> Unit) {
+        launchCatching {
+            comments.editComment(
+                editableComment.value
+            )
+            onSuccess()
+        }
+    }
+
+    fun deleteComment() {
+        launchCatching {
+            comments.deleteComment(editableComment.value.id)
+        }
     }
 }

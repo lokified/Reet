@@ -42,24 +42,17 @@ class NewReportViewModel @Inject constructor(
     fun addReport(navigateToHome: () -> Unit) {
 
         launchCatching {
-            try {
-                isLoading.value = true
-                storage.addReport(
-                    report = Report(
-                        reportContent = reportContent,
-                        createdAt = System.currentTimeMillis(),
-                        createdOn = DateUtil.getCurrentDate(),
-                        userId = localUser.value.userId
-                    ),
-                    imageUri = imageUri
-                )
-                isLoading.value = false
-                navigateToHome()
-                resetField()
-            } catch (e: FirebaseException) {
-                isLoading.value = false
-                errorMessage.value = e.message ?: "Something went wrong"
-            }
+            storage.addReport(
+                report = Report(
+                    reportContent = reportContent,
+                    createdAt = System.currentTimeMillis(),
+                    createdOn = DateUtil.getCurrentDate(),
+                    userId = localUser.value.userId
+                ),
+                imageUri = imageUri
+            )
+            navigateToHome()
+            resetField()
         }
     }
 

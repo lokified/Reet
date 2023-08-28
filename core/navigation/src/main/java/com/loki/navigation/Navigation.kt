@@ -3,8 +3,6 @@ package com.loki.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
@@ -35,7 +33,6 @@ import com.loki.settings.SettingsScreen
 import com.loki.settings.SettingsViewModel
 import com.loki.ui.utils.Constants.REPORT_ID
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.homeNavGraph(viewModel: NavigationViewModel,onNavigateToLogin: (Screen) -> Unit) {
 
@@ -167,7 +164,7 @@ fun NavGraphBuilder.reportScreen(onNavigateBack: () -> Unit, viewModel: Navigati
         val reportViewModel = hiltViewModel<ReportViewModel>()
         ReportScreen(
             viewModel = reportViewModel,
-            onNavigateBack = onNavigateBack
+            navigateBack = onNavigateBack
         )
     }
 }
