@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace = "com.loki.di"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 23
-        targetSdk = 33
+        targetSdk = 34
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -46,5 +46,8 @@ dependencies {
     implementation(libs.androidx.datastore)
 
     implementation(libs.bundles.retrofit)
-    implementation(libs.bundles.unitTests)
+
+    testImplementation(libs.bundles.test.common)
+    androidTestImplementation(libs.bundles.android.test)
+    testImplementation(libs.bundles.unitTests)
 }

@@ -6,11 +6,11 @@ plugins {
 
 android {
     namespace = "com.loki.ui"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 23
-        targetSdk = 33
+        targetSdk = 34
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -53,5 +53,8 @@ dependencies {
 
     implementation(libs.bundles.hilt)
     kapt(libs.bundles.hilt.kapt)
+
     implementation(libs.bundles.unitTests)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.bundles.firebase)
 }
