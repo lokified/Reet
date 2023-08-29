@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 open class ReetViewModel(
     private val dataStore: DataStoreStorage
-    ): ViewModel() {
+): ViewModel() {
 
     // app theme
     val isDarkTheme = mutableStateOf(true)
@@ -38,44 +38,34 @@ open class ReetViewModel(
     var errorMessage = mutableStateOf("")
     var isLoading = mutableStateOf(false)
 
-    //user setup values
-    val localUser = mutableStateOf(LocalUser())
-    var userId = mutableStateOf("")
-    var completeProfileUserName = mutableStateOf("")
+    //user values
+    private val _localUser = MutableStateFlow(LocalUser())
+    val localUser = _localUser.asStateFlow()
 
     //profile values
-    val userInitial = mutableStateOf("")
-    var localProfile = mutableStateOf(LocalProfile())
+    private val _localProfile = MutableStateFlow(LocalProfile())
+    val localProfile = _localProfile.asStateFlow()
 
     init {
+        getUser()
+        getLocalProfile()
         getAppTheme()
     }
 
     fun getUser() {
         viewModelScope.launch {
             dataStore.getUser().collect {
-                localUser.value = LocalUser(
+                _localUser.value = LocalUser(
                     userId = it.userId,
                     name = it.name,
                     email = it.email,
                     isLoggedIn = it.isLoggedIn,
                 )
-
-                var firstName = "R"
-                var lastName = "U"
-
-                if (it.name.isNotBlank()) {
-                    val userList = it.name.split(" ")
-                    firstName = userList[0][0].toString()
-                    lastName = userList[1][0].toString()
-                }
-
-                userInitial.value = firstName + lastName
             }
         }
     }
 
-    suspend fun updateUser(localUser: LocalUser) {
+    fun updateUser(localUser: LocalUser) {
         viewModelScope.launch {
             dataStore.saveUser(localUser)
         }
@@ -84,17 +74,17 @@ open class ReetViewModel(
     fun getLocalProfile() {
         viewModelScope.launch {
             dataStore.getProfile().collect {
-                localProfile.value = LocalProfile(
+                _localProfile.value =  LocalProfile(
+                    id = it.id,
                     userName = it.userName,
+                    userNameInitials = it.userNameInitials,
                     profileBackground = it.profileBackground
                 )
-                Log.d("profile:reet", it.userName)
-
             }
         }
     }
 
-    suspend fun updateProfile(localProfile: LocalProfile) {
+    fun updateProfile(localProfile: LocalProfile) {
         viewModelScope.launch {
             dataStore.saveProfile(localProfile)
         }

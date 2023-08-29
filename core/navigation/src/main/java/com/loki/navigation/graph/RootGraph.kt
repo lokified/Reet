@@ -11,6 +11,7 @@ import com.loki.navigation.NavigationViewModel
 import com.loki.navigation.Screen
 import com.loki.navigation.ext.clearAndRestart
 import com.loki.navigation.ext.navigateTo
+import com.loki.navigation.forgotPasswordScreen
 import com.loki.navigation.homeNavGraph
 import com.loki.navigation.loginScreen
 import com.loki.navigation.registerScreen
@@ -40,7 +41,8 @@ fun RootNavGraph(
 
 
         loginScreen(viewModel = viewModel, navigateTo = navController::navigateTo)
-        registerScreen(navigateTo = navController::navigateTo)
+        registerScreen(navigateBack = navController::navigateUp)
+        forgotPasswordScreen(navigateBack = navController::navigateUp)
         homeNavGraph(
             onNavigateToLogin = {
                 logoutEvent.value = true

@@ -10,6 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.loki.auth.forgotPassword.ForgotPasswordScreen
+import com.loki.auth.forgotPassword.ForgotPasswordViewModel
 import com.loki.auth.login.LoginScreen
 import com.loki.auth.login.LoginViewModel
 import com.loki.auth.register.RegisterScreen
@@ -25,8 +27,9 @@ import com.loki.new_report.NewReportScreen
 import com.loki.new_report.NewReportViewModel
 import com.loki.news.NewsScreen
 import com.loki.news.NewsViewModel
-import com.loki.profile.ProfileScreen
+import com.loki.profile.profile.ProfileScreen
 import com.loki.profile.ProfileViewModel
+import com.loki.profile.username.UsernameChangeScreen
 import com.loki.report.ReportScreen
 import com.loki.report.ReportViewModel
 import com.loki.settings.SettingsScreen
@@ -89,22 +92,32 @@ fun NavGraphBuilder.loginScreen(viewModel: NavigationViewModel, navigateTo: (Scr
             LoginScreen(
                 viewModel = loginViewModel,
                 navigateToRegister = { navigateTo(Screen.RegisterScreen) },
+                navigateToForgotScreen = { navigateTo(Screen.ForgotPasswordScreen) },
                 navigateToHome = { navigateTo(Screen.HomeScreen.withClearBackStack()) }
             )
         }
     }
 }
 
-fun NavGraphBuilder.registerScreen(navigateTo: (Screen) -> Unit) {
+fun NavGraphBuilder.registerScreen(navigateBack: () -> Unit) {
     composable(route = Screen.RegisterScreen.route) {
         val viewModel = hiltViewModel<RegisterViewModel>()
         RegisterScreen(
             viewModel = viewModel,
-            navigateToLogin = { navigateTo(Screen.LoginScreen) }
+            navigateToLogin = navigateBack
         )
     }
 }
 
+fun NavGraphBuilder.forgotPasswordScreen(navigateBack: () -> Unit) {
+    composable(route = Screen.ForgotPasswordScreen.route) {
+        val viewModel = hiltViewModel<ForgotPasswordViewModel>()
+        ForgotPasswordScreen(
+            viewModel = viewModel,
+            navigateBack = navigateBack
+        )
+    }
+}
 
 fun NavGraphBuilder.reportNavGraph(viewModel: NavigationViewModel) {
     composable(route = Screen.ReportListScreen.route) {
@@ -199,7 +212,21 @@ fun NavGraphBuilder.profileScreen(onNavigateTo: (Screen) -> Unit, onNavigateToLo
         ProfileScreen(
             viewModel = profileViewModel,
             navigateToSettings = { onNavigateTo(Screen.SettingsScreen) },
+            navigateToChangeUsername = { onNavigateTo(Screen.UsernameChangeScreen) },
             navigateToLogin = { onNavigateToLogin(Screen.LoginScreen) }
+        )
+    }
+}
+
+fun NavGraphBuilder.usernameChangeScreen(onNavigateBack: () -> Unit, viewModel: NavigationViewModel) {
+    composable(route = Screen.UsernameChangeScreen.route) {
+        LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
+            viewModel.setBottomBarVisible(false)
+        }
+        val profileViewModel = hiltViewModel<ProfileViewModel>()
+        UsernameChangeScreen(
+            viewModel = profileViewModel,
+            navigateBack = onNavigateBack
         )
     }
 }

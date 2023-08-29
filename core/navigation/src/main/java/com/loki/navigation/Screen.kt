@@ -26,12 +26,14 @@ sealed class Screen(
 
     object LoginScreen: Screen("login_screen")
     object RegisterScreen: Screen("register_screen")
+    object ForgotPasswordScreen: Screen("forgot_password_screen")
     object HomeScreen: Screen("home_screen")
     object ReportListScreen: Screen(route = "report_list_screen", title = "Home", icon = Icons.Filled.Home)
     object NewsScreen: Screen(route = "news_screen", title = "News", restoreState = false, icon = Icons.Filled.Newspaper)
     object NewReportScreen: Screen("new_report_screen")
     object ReportScreen: Screen("report_screen", restoreState = false)
     object ProfileScreen: Screen("profile_screen", title = "Profile", icon = Icons.Filled.AccountCircle)
+    object UsernameChangeScreen: Screen("change_username_screen")
     object SettingsScreen: Screen("settings_screen")
 
 }

@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.loki.ui.components.AppTopBar
 import com.loki.ui.components.ProfileCircleBox
 import kotlinx.coroutines.job
@@ -56,6 +57,7 @@ fun NewReportScreen(
 ) {
 
     val uiState by viewModel.state
+    val localProfile by viewModel.localProfile.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
 
@@ -76,6 +78,24 @@ fun NewReportScreen(
         uri?.let {
             viewModel.onChangeImageUri(uri)
             isGalleryClicked = false
+        }
+    }
+
+    if (viewModel.errorMessage.value.isNotBlank()) {
+        LaunchedEffect(key1 = viewModel.errorMessage.value) {
+            Toast.makeText(
+                context,
+                viewModel.errorMessage.value,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    if (isGalleryClicked) {
+        SideEffect {
+            galleryLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
         }
     }
 
@@ -100,8 +120,8 @@ fun NewReportScreen(
 
 
         ProfileCircleBox(
-            initials = viewModel.userInitial.value,
-            backgroundColor = Color(viewModel.localProfile.value.profileBackground),
+            initials = localProfile.userNameInitials,
+            backgroundColor = Color(localProfile.profileBackground),
             initialsSize = 20,
             modifier = Modifier
                 .size(80.dp)
@@ -163,23 +183,5 @@ fun NewReportScreen(
             }
         }
 
-    }
-
-    if (viewModel.errorMessage.value.isNotBlank()) {
-        LaunchedEffect(key1 = Unit) {
-            Toast.makeText(
-                context,
-                viewModel.errorMessage.value,
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    if (isGalleryClicked) {
-        SideEffect {
-            galleryLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        }
     }
 }

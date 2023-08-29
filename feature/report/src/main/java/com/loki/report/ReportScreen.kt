@@ -65,8 +65,11 @@ fun ReportScreen(
 ) {
 
     val uiState by viewModel.state
+    val localUser by viewModel.localUser.collectAsStateWithLifecycle()
+    val localProfile by viewModel.localProfile.collectAsStateWithLifecycle()
     val comments by viewModel.commentState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
     var isReportMoreClicked by rememberSaveable { mutableStateOf(false) }
     var isCommentMoreClicked by rememberSaveable { mutableStateOf(false) }
     var isEditReportClicked by remember { mutableStateOf(false) }
@@ -309,7 +312,7 @@ fun ReportScreen(
                             isCommentMoreClicked = true
                             viewModel.onCommentIdChange(matchedComment.comment)
                                       },
-                        isUserMatched = viewModel.localUser.value.userId == matchedComment.comment.userId,
+                        isUserMatched = localUser.userId == matchedComment.comment.userId,
                         modifier = Modifier.padding(
                             vertical = 4.dp,
                             horizontal = 16.dp
@@ -338,8 +341,8 @@ fun ReportScreen(
                 ) {
 
                     ProfileCircleBox(
-                        initials = viewModel.localUser.value.name.toInitials(),
-                        backgroundColor = Color(viewModel.localProfile.value.profileBackground),
+                        initials = localProfile.userNameInitials,
+                        backgroundColor = Color(localProfile.profileBackground),
                         initialsSize = 15,
                         modifier = Modifier.size(30.dp)
                     )

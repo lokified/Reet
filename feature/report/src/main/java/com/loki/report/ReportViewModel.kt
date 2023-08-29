@@ -42,8 +42,6 @@ class ReportViewModel @Inject constructor(
     val editableComment = mutableStateOf(Comment())
 
     init {
-        getLocalProfile()
-        getUser()
         savedStateHandle.get<String>(REPORT_ID)?.let { reportId ->
             getReport(reportId)
             getComments(reportId)

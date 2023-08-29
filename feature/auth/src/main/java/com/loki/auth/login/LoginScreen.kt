@@ -1,6 +1,7 @@
 package com.loki.auth.login
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,7 @@ import com.loki.ui.utils.TextFieldColorUtil.colors
 fun LoginScreen(
     viewModel: LoginViewModel,
     navigateToRegister: () -> Unit,
+    navigateToForgotScreen: () -> Unit,
     navigateToHome: () -> Unit
 ) {
 
@@ -78,8 +80,23 @@ fun LoginScreen(
         }
     }
 
+    if (viewModel.isLoading.value) {
+        Loading()
+    }
+
+    if (viewModel.errorMessage.value.isNotBlank()) {
+        LaunchedEffect(key1 = viewModel.errorMessage.value) {
+            Toast.makeText(
+                context,
+                viewModel.errorMessage.value,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         Column(
@@ -133,7 +150,7 @@ fun LoginScreen(
                 fontSize = 18.sp,
                 modifier = Modifier
                     .padding(vertical = 4.dp)
-                    .clickable { },
+                    .clickable { navigateToForgotScreen() },
                 color = textColor
             )
 
@@ -157,6 +174,7 @@ fun LoginScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(CenterHorizontally)
+                    .height(48.dp)
             ) {
                 Text(text = "Login")
             }
@@ -196,7 +214,7 @@ fun LoginScreen(
                 )
             },
             isEnabled = !viewModel.isLoading.value,
-            name = viewModel.completeProfileUserName.value
+            name = viewModel.names.value
         ) {
             OutlinedTextField(
                 label = {
@@ -215,20 +233,6 @@ fun LoginScreen(
                 enabled = !viewModel.isLoading.value,
                 colors = colors(isDarkTheme)
             )
-        }
-    }
-
-    if (viewModel.isLoading.value) {
-        Loading()
-    }
-
-    if (viewModel.errorMessage.value.isNotBlank()) {
-        LaunchedEffect(key1 = viewModel.errorMessage.value) {
-            Toast.makeText(
-                context,
-                viewModel.errorMessage.value,
-                Toast.LENGTH_LONG
-            ).show()
         }
     }
 }

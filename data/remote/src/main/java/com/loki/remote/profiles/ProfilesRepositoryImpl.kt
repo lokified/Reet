@@ -28,7 +28,6 @@ class ProfilesRepositoryImpl @Inject constructor(
         profile = if (profiles.size == 0) {
             null
         } else {
-            profileIds.value = profiles[0].id
             profiles[0]
         }
 
@@ -47,17 +46,14 @@ class ProfilesRepositoryImpl @Inject constructor(
 
     override suspend fun updateUsername(profile: Profile) {
         trace(UPDATE_PROFILE_USERNAME_TRACE) {
-            val profileWithUsername = profile.copy(userName = profile.userName)
             storage.collection(USER_PROFILE_COLLECTIONS)
-                .document(profileIds.value)
-                .set(profileWithUsername)
+                .document(profile.id)
+                .set(profile)
                 .await()
         }
     }
 
     companion object {
-
-        val profileIds = mutableStateOf("")
 
         //collections
         const val USER_PROFILE_COLLECTIONS = "profile_collections"

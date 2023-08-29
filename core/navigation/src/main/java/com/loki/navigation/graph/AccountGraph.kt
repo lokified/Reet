@@ -9,6 +9,7 @@ import com.loki.navigation.Screen
 import com.loki.navigation.ext.navigateTo
 import com.loki.navigation.profileScreen
 import com.loki.navigation.settingsScreen
+import com.loki.navigation.usernameChangeScreen
 
 @Composable
 fun AccountNavGraph(
@@ -24,6 +25,7 @@ fun AccountNavGraph(
         modifier = modifier
     ) {
         profileScreen(onNavigateTo = navController::navigateTo, viewModel = viewModel, onNavigateToLogin = onNavigateToLogin)
+        usernameChangeScreen(onNavigateBack = navController::navigateUp, viewModel = viewModel)
         settingsScreen(onNavigateBack = navController::navigateUp, viewModel = viewModel)
     }
 }

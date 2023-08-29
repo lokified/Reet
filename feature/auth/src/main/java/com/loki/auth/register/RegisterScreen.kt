@@ -1,6 +1,7 @@
 package com.loki.auth.register
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,7 +62,9 @@ fun RegisterScreen(
     else MaterialTheme.colorScheme.onBackground
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
         Column(
@@ -169,7 +172,8 @@ fun RegisterScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                    .align(Alignment.CenterHorizontally)
+                    .height(48.dp),
                 enabled = !viewModel.isLoading.value
             ) {
                 Text(text = "Sign Up")
@@ -211,7 +215,7 @@ fun RegisterScreen(
                 )
             },
             isEnabled = !viewModel.isLoading.value,
-            name = viewModel.completeProfileUserName.value
+            name = viewModel.names.value
         ) {
             OutlinedTextField(
                 label = {

@@ -42,6 +42,7 @@ fun ReportListScreen(
 ) {
 
     val uiState by viewModel.reportsUiState.collectAsStateWithLifecycle()
+    val localProfile by viewModel.localProfile.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     Scaffold(
@@ -50,8 +51,8 @@ fun ReportListScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 leadingItem = {
                     ProfileCircleBox(
-                        initials = viewModel.userInitial.value,
-                        backgroundColor = Color(viewModel.localProfile.value.profileBackground),
+                        initials = localProfile.userNameInitials,
+                        backgroundColor = Color(localProfile.profileBackground),
                         initialsSize = 20,
                         modifier = Modifier.size(40.dp)
                     )

@@ -1,7 +1,7 @@
-package com.loki.profile
+package com.loki.profile.profile
 
 import android.content.Intent
-import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,57 +21,60 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.loki.profile.ProfileViewModel
 import com.loki.ui.components.AppTopBar
 import com.loki.ui.components.ExtendedRowItem
 import com.loki.ui.components.ProfileCircleBox
-import com.loki.ui.utils.ext.toInitials
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
     navigateToSettings: () -> Unit,
+    navigateToChangeUsername: () -> Unit,
     navigateToLogin: () -> Unit
 ) {
 
-    val uiState by viewModel.state
-    var openBottomSheet by rememberSaveable{ mutableStateOf(false) }
+    val localProfile by viewModel.localProfile.collectAsState()
+    val localUser by viewModel.localUser.collectAsState()
+    val context = LocalContext.current
 
     val openIntent = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
         onResult = {}
     )
+
+    if (viewModel.errorMessage.value.isNotBlank()) {
+        LaunchedEffect(key1 = viewModel.errorMessage.value) {
+            Toast.makeText(
+                context,
+                viewModel.errorMessage.value,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
 
     Scaffold (
         topBar = {
@@ -95,15 +96,22 @@ fun ProfileScreen(
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 ProfileBox(
-                    backgroundColor = Color(viewModel.localProfile.value.profileBackground),
-                    initials = viewModel.localUser.value.name.toInitials(),
+                    backgroundColor = Color(localProfile.profileBackground),
+                    initials = localProfile.userNameInitials,
                     onEditClick = {}
                 )
             }
 
-            ExtendedRowItem(content = "Names", subContent = viewModel.localUser.value.name)
-            ExtendedRowItem(content = "Email", subContent = viewModel.localUser.value.email)
-            ExtendedRowItem(content = "Username", subContent = viewModel.localProfile.value.userName)
+            ExtendedRowItem(content = "Names", subContent = localUser.name)
+            ExtendedRowItem(content = "Email", subContent = localUser.email)
+            ExtendedRowItem(
+                content = "Username",
+                subContent = localProfile.userName,
+                isEditable = true,
+                onRowClick = {
+                    navigateToChangeUsername()
+                }
+            )
 
             Text(text = "SETTINGS", modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
 
@@ -149,21 +157,10 @@ fun ProfileScreen(
             )
 
             Text(
-                text = "1.0.0",
+                text = "v1.1.0",
                 fontSize = 12.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-        }
-    }
-    if (openBottomSheet) {
-        EditUsernameSheet(viewModel = viewModel, uiState = uiState) {
-            openBottomSheet = false
-        }
-    }
-
-    LaunchedEffect(key1 = Unit) {
-        if (!viewModel.isLoading.value) {
-            openBottomSheet = false
         }
     }
 }
@@ -266,62 +263,6 @@ fun RowItem(
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(text = content)
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditUsernameSheet(
-    viewModel: ProfileViewModel,
-    uiState: ProfileUiState,
-    onDismiss: () -> Unit
-) {
-
-    ModalBottomSheet(
-        onDismissRequest = { onDismiss() },
-        shape = RoundedCornerShape(
-            topStart = 8.dp,
-            topEnd = 8.dp
-        )
-    ) {
-
-        Column(
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                label = {
-                    Text(
-                        text = "Username",
-                        color = MaterialTheme.colorScheme.onBackground.copy(.5f)
-                    )
-                },
-                value = uiState.username,
-                onValueChange = viewModel::onUsernameChange,
-                placeholder = {
-                    Text(
-                        text = "Enter username",
-                        color = MaterialTheme.colorScheme.onBackground.copy(.5f)
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !viewModel.isLoading.value,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(.02f)
-                )
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = viewModel::updateUsername,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Update Username")
-            }
-            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

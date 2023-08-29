@@ -1,4 +1,4 @@
-package com.loki.profile
+package com.loki.profile.profile
 
 data class ProfileUiState(
     val username: String = "",
