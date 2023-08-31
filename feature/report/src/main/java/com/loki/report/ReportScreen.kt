@@ -239,7 +239,7 @@ fun ReportScreen(
                                         shape = RoundedCornerShape(8.dp),
                                         color = MaterialTheme.colorScheme.onSecondary
                                     )
-                                    .height(200.dp)
+                                    .height(400.dp)
                             ) {
                                 AsyncImage(
                                     model = it,
@@ -247,7 +247,7 @@ fun ReportScreen(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .clip(RoundedCornerShape(12.dp)),
-                                    contentScale = ContentScale.Crop,
+                                    contentScale = ContentScale.FillBounds
                                 )
                             }
                         }

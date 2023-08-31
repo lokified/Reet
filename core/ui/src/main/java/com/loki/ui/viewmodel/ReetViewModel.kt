@@ -35,6 +35,7 @@ open class ReetViewModel(
             }
         }
 
+    var message = mutableStateOf("")
     var errorMessage = mutableStateOf("")
     var isLoading = mutableStateOf(false)
 

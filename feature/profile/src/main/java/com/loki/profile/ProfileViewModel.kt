@@ -38,7 +38,8 @@ class ProfileViewModel @Inject constructor(
             name = localUser.value.name,
             userName = localProfile.value.userName,
             profileBackgroundColor = localProfile.value.profileBackground,
-            userId = localUser.value.userId
+            userId = localUser.value.userId,
+            profileImage = localProfile.value.profileImage
         )
     }
 
@@ -57,14 +58,14 @@ class ProfileViewModel @Inject constructor(
                 )
             )
 
-            onSuccess()
-        }
-
-        updateProfile(
-            localProfile.value.copy(
-                profileImage = imageUri.toString()
+            updateProfile(
+                localProfile.value.copy(
+                    profileImage = imageUri.toString()
+                )
             )
-        )
+            onSuccess()
+            message.value = "Profile Updated"
+        }
     }
 
     fun updateUsername(onSuccess: () -> Unit) {
@@ -74,14 +75,14 @@ class ProfileViewModel @Inject constructor(
                     userName = username
                 )
             )
-            onSuccess()
-        }
-
-        updateProfile(
-            localProfile.value.copy(
-                userName = username
+            updateProfile(
+                localProfile.value.copy(
+                    userName = username
+                )
             )
-        )
+            onSuccess()
+            message.value = "Username Updated"
+        }
     }
 
     fun logOut(navigateToLogin: () -> Unit) {

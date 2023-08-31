@@ -56,8 +56,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v2.0.0
-          release_name: ${{ github.event.repository.name }} v2.0.0
+          tag_name: v1.2.0
+          release_name: ${{ github.event.repository.name }} v1.2.0
 
       - name: Upload Release APK
         id: upload_release_asset

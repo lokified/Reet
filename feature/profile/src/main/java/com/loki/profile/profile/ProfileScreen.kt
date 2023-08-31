@@ -6,7 +6,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -45,18 +44,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.loki.profile.ProfileViewModel
 import com.loki.ui.components.AppTopBar
 import com.loki.ui.components.ExtendedRowItem
@@ -188,8 +182,8 @@ fun ProfileScreen(
                 iconBackground = Color(0xFF95CF88),
                 content = "Make request",
                 onRowClick = {
-                    val intent = Intent(Intent.ACTION_SEND)
-                    intent.type = "text/plain"
+                    val intent = Intent(Intent.ACTION_SENDTO)
+                    intent.data = Uri.parse("mailto:")
                     intent.putExtra(Intent.EXTRA_EMAIL, arrayOf("sheldonokware@gmail.com"))
                     openIntent.launch(intent)
                 }
@@ -200,9 +194,9 @@ fun ProfileScreen(
                 iconBackground = Color(0xFFA8719F),
                 content = "Call Support",
                 onRowClick = {
-//                    val intent = Intent(Intent.ACTION_CALL)
-//                    intent.data = Uri.parse("tel:254725992494")
-//                    openIntent.launch(intent)
+                    val intent = Intent(Intent.ACTION_DIAL)
+                    intent.data = Uri.parse("tel:254725992494")
+                    openIntent.launch(intent)
                 }
             )
 
@@ -216,7 +210,7 @@ fun ProfileScreen(
             )
 
             Text(
-                text = "v1.1.0",
+                text = "v1.2.0",
                 fontSize = 12.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
