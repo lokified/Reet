@@ -33,7 +33,7 @@ fun BottomNavigation(
     AnimatedVisibility(
         visible = isVisible,
         enter = slideInVertically(initialOffsetY = { it }),
-        exit = slideOutVertically(targetOffsetY = { it })
+        exit = slideOutVertically(targetOffsetY = { it / 10 })
     ) {
 
         AppBottomBar(

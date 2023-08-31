@@ -54,7 +54,8 @@ fun ReportListScreen(
                         initials = localProfile.userNameInitials,
                         backgroundColor = Color(localProfile.profileBackground),
                         initialsSize = 20,
-                        modifier = Modifier.size(40.dp)
+                        modifier = Modifier.size(40.dp),
+                        imageUri = localProfile.profileImage
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(text = "Home", fontSize = 22.sp, fontWeight = FontWeight.Bold)

@@ -101,7 +101,6 @@ class LoginViewModel @Inject constructor(
             //checks if user has remote profile
             val isProfile = getRemoteProfile(user.id)
 
-
             if (isProfile) {
                 // saves logged in user
                 updateUser(
@@ -118,10 +117,11 @@ class LoginViewModel @Inject constructor(
                         id = localProfileState.value.id,
                         userName = localProfileState.value.username,
                         userNameInitials = names.value.toInitials(),
-                        profileBackground = localProfileState.value.profileBackground!!
+                        profileBackground = localProfileState.value.profileBackground!!,
+                        profileImage = localProfileState.value.profileImage
                     )
                 )
-                delay(1000L)
+                delay(2000L)
                 resetField()
                 navigateToHome()
             }
@@ -204,7 +204,8 @@ class LoginViewModel @Inject constructor(
             localProfileState.value = LocalProfileState(
                 id = remoteProfile.id,
                 username = remoteProfile.userName,
-                profileBackground = remoteProfile.profileBackgroundColor
+                profileBackground = remoteProfile.profileBackgroundColor,
+                profileImage = remoteProfile.profileImage
             )
         }
 

@@ -52,7 +52,8 @@ fun CommentItem(
                 initials = profile.name.toInitials(),
                 backgroundColor = Color(profile.profileBackgroundColor!!),
                 initialsSize = 15,
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier.size(30.dp),
+                imageUri = profile.profileImage
             )
 
             Spacer(modifier = Modifier.width(4.dp))

@@ -1,9 +1,12 @@
 package com.loki.profile.profile
 
+import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,19 +25,27 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -43,23 +54,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.loki.profile.ProfileViewModel
 import com.loki.ui.components.AppTopBar
 import com.loki.ui.components.ExtendedRowItem
 import com.loki.ui.components.ProfileCircleBox
+import com.loki.ui.permission.PermissionAction
+import com.loki.ui.permission.PermissionDialog
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
     navigateToSettings: () -> Unit,
     navigateToChangeUsername: () -> Unit,
-    navigateToLogin: () -> Unit
+    navigateToLogin: () -> Unit,
+    navigateToCamera: () -> Unit
 ) {
 
-    val localProfile by viewModel.localProfile.collectAsState()
-    val localUser by viewModel.localUser.collectAsState()
+    val localProfile by viewModel.localProfile.collectAsStateWithLifecycle()
+    val localUser by viewModel.localUser.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var isPermissionDialogClicked by rememberSaveable { mutableStateOf(false) }
 
     val openIntent = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -74,6 +93,43 @@ fun ProfileScreen(
                 Toast.LENGTH_LONG
             ).show()
         }
+    }
+
+    if (isPermissionDialogClicked) {
+        PermissionDialog(
+            context = context,
+            permission = Manifest.permission.CAMERA,
+            permissionRationale = Manifest.permission.CAMERA,
+            snackbarHostState = snackbarHostState,
+            permissionAction = { action ->
+
+                when (action) {
+                    is PermissionAction.PermissionGranted -> {
+                        Toast.makeText(
+                            context,
+                            "Permission Granted",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        isPermissionDialogClicked = false
+                        navigateToCamera()
+                    }
+
+                    is PermissionAction.PermissionDenied -> {
+                        Toast.makeText(
+                            context,
+                            "Permission Not Granted",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        isPermissionDialogClicked = false
+                    }
+
+                    is PermissionAction.PermissionAlreadyGranted -> {
+                        isPermissionDialogClicked = false
+                        navigateToCamera()
+                    }
+                }
+            }
+        )
     }
 
     Scaffold (
@@ -98,7 +154,10 @@ fun ProfileScreen(
                 ProfileBox(
                     backgroundColor = Color(localProfile.profileBackground),
                     initials = localProfile.userNameInitials,
-                    onEditClick = {}
+                    imageUri = localProfile.profileImage,
+                    onEditClick = {
+                        isPermissionDialogClicked = true
+                    }
                 )
             }
 
@@ -169,54 +228,44 @@ fun ProfileScreen(
 fun ProfileBox(
     modifier: Modifier = Modifier,
     initials: String? = null,
-    imageUrl: String? = null,
+    imageUri: String,
     backgroundColor: Color,
     onEditClick: () -> Unit
 ) {
 
     Box(
         modifier = modifier
-            .size(100.dp)
+            .size(120.dp)
             .background(
-                color = backgroundColor,
+                color = MaterialTheme.colorScheme.secondaryContainer,
                 shape = CircleShape
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (initials != null) {
-            ProfileCircleBox(
-                initials = initials,
-                backgroundColor = backgroundColor,
-                initialsSize = 30,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-        if (imageUrl != null) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = "profile image",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backgroundColor),
-                contentScale = ContentScale.Crop
-            )
-        }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    color = Color.Black.copy(.5f),
-                    shape = CircleShape
-                )
-                .clickable { onEditClick() },
-            contentAlignment = Alignment.Center
+        ProfileCircleBox(
+            initials = initials!!,
+            imageUri = imageUri,
+            backgroundColor = backgroundColor,
+            initialsSize = 30,
+            size = 120.dp,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        IconButton(
+            onClick = onEditClick,
+            modifier = Modifier.align(Alignment.BottomEnd),
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            )
         ) {
-            Text(
-                text = "Change Profile",
-                fontSize = 12.sp,
-                color = Color.White,
-                textAlign = TextAlign.Center
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = "Edit",
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(4.dp),
+                tint = MaterialTheme.colorScheme.onBackground
             )
         }
     }

@@ -1,5 +1,7 @@
 package com.loki.navigation
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,6 +18,7 @@ import com.loki.auth.login.LoginScreen
 import com.loki.auth.login.LoginViewModel
 import com.loki.auth.register.RegisterScreen
 import com.loki.auth.register.RegisterViewModel
+import com.loki.camera.CameraScreen
 import com.loki.home.home.HomeScreen
 import com.loki.home.report_list.ReportListScreen
 import com.loki.home.report_list.ReportListViewModel
@@ -148,7 +151,21 @@ fun NavGraphBuilder.reportListScreen(onNavigateTo: (Screen) -> Unit, viewModel: 
 }
 
 fun NavGraphBuilder.newReportScreen(onNavigateTo: (Screen) -> Unit, viewModel: NavigationViewModel) {
-    composable(route = Screen.NewReportScreen.route) {
+    composable(
+        route = Screen.NewReportScreen.route,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                animationSpec = tween(600)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                animationSpec = tween(200)
+            )
+        }
+    ) {
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(false)
         }
@@ -169,7 +186,19 @@ fun NavGraphBuilder.reportScreen(onNavigateBack: () -> Unit, viewModel: Navigati
             navArgument(REPORT_ID) {
                 type = NavType.StringType
             }
-        )
+        ),
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(600)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(200)
+            )
+        }
     ) {
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(false)
@@ -213,13 +242,28 @@ fun NavGraphBuilder.profileScreen(onNavigateTo: (Screen) -> Unit, onNavigateToLo
             viewModel = profileViewModel,
             navigateToSettings = { onNavigateTo(Screen.SettingsScreen) },
             navigateToChangeUsername = { onNavigateTo(Screen.UsernameChangeScreen) },
-            navigateToLogin = { onNavigateToLogin(Screen.LoginScreen) }
+            navigateToLogin = { onNavigateToLogin(Screen.LoginScreen) },
+            navigateToCamera = { onNavigateTo(Screen.CameraScreen) }
         )
     }
 }
 
 fun NavGraphBuilder.usernameChangeScreen(onNavigateBack: () -> Unit, viewModel: NavigationViewModel) {
-    composable(route = Screen.UsernameChangeScreen.route) {
+    composable(
+        route = Screen.UsernameChangeScreen.route,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(600)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(200)
+            )
+        }
+    ) {
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(false)
         }
@@ -232,7 +276,21 @@ fun NavGraphBuilder.usernameChangeScreen(onNavigateBack: () -> Unit, viewModel: 
 }
 
 fun NavGraphBuilder.settingsScreen(onNavigateBack: () -> Unit, viewModel: NavigationViewModel) {
-    composable(route = Screen.SettingsScreen.route) {
+    composable(
+        route = Screen.SettingsScreen.route,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(600)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(200)
+            )
+        }
+    ) {
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(false)
         }
@@ -240,6 +298,33 @@ fun NavGraphBuilder.settingsScreen(onNavigateBack: () -> Unit, viewModel: Naviga
         SettingsScreen(
             navigateBack = onNavigateBack,
             viewModel = settingsViewModel
+        )
+    }
+}
+
+fun NavGraphBuilder.cameraScreen(onNavigateBack: () -> Unit,viewModel: NavigationViewModel) {
+    composable(
+        route = Screen.CameraScreen.route,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(600)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(200)
+            )
+        }
+    ) {
+        LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
+            viewModel.setBottomBarVisible(false)
+        }
+        val profileViewModel = hiltViewModel<ProfileViewModel>()
+        CameraScreen(
+            navigateBack = onNavigateBack,
+            profileViewModel = profileViewModel
         )
     }
 }

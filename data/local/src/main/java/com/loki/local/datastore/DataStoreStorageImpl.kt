@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.loki.local.datastore.DataStoreStorage.ProfilePreference.PROFILE_ID_KEY
 import com.loki.local.datastore.DataStoreStorage.ProfilePreference.USER_BACKGROUND_KEY
+import com.loki.local.datastore.DataStoreStorage.ProfilePreference.USER_IMAGE_KEY
 import com.loki.local.datastore.DataStoreStorage.ProfilePreference.USER_USERNAME_INITIALS_KEY
 import com.loki.local.datastore.DataStoreStorage.ProfilePreference.USER_USERNAME_KEY
 import com.loki.local.datastore.DataStoreStorage.ThemePreference.IS_DARK_THEME_KEY
@@ -49,7 +50,8 @@ class DataStoreStorageImpl @Inject constructor(
             preference[PROFILE_ID_KEY] = localProfile.id
             preference[USER_USERNAME_KEY] = localProfile.userName
             preference[USER_USERNAME_INITIALS_KEY] = localProfile.userNameInitials
-            preference[USER_BACKGROUND_KEY] = localProfile.profileBackground!!
+            preference[USER_BACKGROUND_KEY] = localProfile.profileBackground
+            preference[USER_IMAGE_KEY] = localProfile.profileImage
         }
     }
 
@@ -60,8 +62,9 @@ class DataStoreStorageImpl @Inject constructor(
             val username = preferences[USER_USERNAME_KEY] ?: ""
             val usernameInitials = preferences[USER_USERNAME_INITIALS_KEY] ?: ""
             val background = preferences[USER_BACKGROUND_KEY] ?: 0xFFF1736A
+            val profileImage = preferences[USER_IMAGE_KEY] ?: ""
 
-            LocalProfile(id, username, usernameInitials, background)
+            LocalProfile(id, username, usernameInitials, background, profileImage)
         }
     }
 

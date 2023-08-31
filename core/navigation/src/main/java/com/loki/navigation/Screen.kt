@@ -35,5 +35,6 @@ sealed class Screen(
     object ProfileScreen: Screen("profile_screen", title = "Profile", icon = Icons.Filled.AccountCircle)
     object UsernameChangeScreen: Screen("change_username_screen")
     object SettingsScreen: Screen("settings_screen")
+    object CameraScreen: Screen("camera_screen")
 
 }

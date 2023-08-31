@@ -18,5 +18,6 @@ object TextFieldColorUtil {
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
         focusedLabelColor =  defaultColorField(isDarkTheme),
+        disabledContainerColor = Color.Transparent
     )
 }

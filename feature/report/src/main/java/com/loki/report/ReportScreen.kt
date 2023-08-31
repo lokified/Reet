@@ -197,7 +197,8 @@ fun ReportScreen(
                                 initials = profile.name.toInitials(),
                                 backgroundColor = Color(profile.profileBackgroundColor!!),
                                 initialsSize = 20,
-                                modifier = Modifier.size(40.dp)
+                                modifier = Modifier.size(40.dp),
+                                imageUri = profile.profileImage
                             )
 
                             Spacer(modifier = Modifier.width(8.dp))
@@ -344,7 +345,8 @@ fun ReportScreen(
                         initials = localProfile.userNameInitials,
                         backgroundColor = Color(localProfile.profileBackground),
                         initialsSize = 15,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(30.dp),
+                        imageUri = localProfile.profileImage
                     )
 
                     Spacer(modifier = Modifier.width(4.dp))

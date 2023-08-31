@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.loki.navigation.NavigationViewModel
 import com.loki.navigation.Screen
+import com.loki.navigation.cameraScreen
 import com.loki.navigation.ext.navigateTo
 import com.loki.navigation.profileScreen
 import com.loki.navigation.settingsScreen
@@ -27,5 +28,6 @@ fun AccountNavGraph(
         profileScreen(onNavigateTo = navController::navigateTo, viewModel = viewModel, onNavigateToLogin = onNavigateToLogin)
         usernameChangeScreen(onNavigateBack = navController::navigateUp, viewModel = viewModel)
         settingsScreen(onNavigateBack = navController::navigateUp, viewModel = viewModel)
+        cameraScreen(onNavigateBack = navController::navigateUp, viewModel = viewModel)
     }
 }

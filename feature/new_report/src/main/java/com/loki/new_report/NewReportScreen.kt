@@ -1,12 +1,10 @@
 package com.loki.new_report
 
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.Button
@@ -35,16 +34,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.rememberAsyncImagePainter
 import com.loki.ui.components.AppTopBar
 import com.loki.ui.components.ProfileCircleBox
 import kotlinx.coroutines.job
@@ -74,10 +74,10 @@ fun NewReportScreen(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
+        isGalleryClicked = false
 
         uri?.let {
             viewModel.onChangeImageUri(uri)
-            isGalleryClicked = false
         }
     }
 
@@ -125,21 +125,11 @@ fun NewReportScreen(
             initialsSize = 20,
             modifier = Modifier
                 .size(80.dp)
-                .padding(16.dp)
+                .padding(16.dp),
+            imageUri = localProfile.profileImage
         )
 
         Column {
-
-            uiState.imageUri?.let {
-                Image(
-                    bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, it).asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(vertical = 4.dp, horizontal = 16.dp)
-                        .size(150.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
 
             TextField(
                 value = uiState.reportContent,
@@ -180,6 +170,20 @@ fun NewReportScreen(
                         contentDescription = "Gallery_icon"
                     )
                 }
+            }
+
+
+            uiState.imageUri?.let {
+                Image(
+                    painter = rememberAsyncImagePainter(model = it),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
             }
         }
 

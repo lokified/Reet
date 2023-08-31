@@ -78,7 +78,8 @@ open class ReetViewModel(
                     id = it.id,
                     userName = it.userName,
                     userNameInitials = it.userNameInitials,
-                    profileBackground = it.profileBackground
+                    profileBackground = it.profileBackground,
+                    profileImage = it.profileImage
                 )
             }
         }

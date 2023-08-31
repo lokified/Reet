@@ -1,5 +1,7 @@
 package com.loki.profile
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import com.loki.local.datastore.DataStoreStorage
 import com.loki.local.datastore.model.LocalProfile
@@ -47,13 +49,22 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun updateProfilePicture() {
+    fun updateProfilePicture(imageUri: Uri, onSuccess: () -> Unit) {
         launchCatching {
-            auth.updateUser(
-                name = null,
-                profilePhoto = null
+            profilesRepository.updateProfileImage(
+                editableProfile.value.copy(
+                    profileImage = imageUri.toString()
+                )
             )
+
+            onSuccess()
         }
+
+        updateProfile(
+            localProfile.value.copy(
+                profileImage = imageUri.toString()
+            )
+        )
     }
 
     fun updateUsername(onSuccess: () -> Unit) {
@@ -63,17 +74,14 @@ class ProfileViewModel @Inject constructor(
                     userName = username
                 )
             )
-
-            updateProfile(
-                LocalProfile(
-                    id = editableProfile.value.id,
-                    userName = editableProfile.value.userName,
-                    userNameInitials = editableProfile.value.name.toInitials(),
-                    profileBackground = editableProfile.value.profileBackgroundColor!!
-                )
-            )
             onSuccess()
         }
+
+        updateProfile(
+            localProfile.value.copy(
+                userName = username
+            )
+        )
     }
 
     fun logOut(navigateToLogin: () -> Unit) {
