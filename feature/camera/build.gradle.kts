@@ -57,7 +57,10 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
     implementation(libs.coil.kt.compose)
+
+    implementation(libs.permissions)
     implementation(libs.bundles.cameraX)
+    implementation(libs.bundles.exoPlayer)
 
     testImplementation(libs.bundles.test.common)
     androidTestImplementation(libs.bundles.android.test)

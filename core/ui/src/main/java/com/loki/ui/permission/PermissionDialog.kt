@@ -18,50 +18,71 @@ import androidx.core.content.ContextCompat
 @Composable
 fun PermissionDialog(
     context: Context,
-    permission: String,
-    permissionRationale: String,
+    permissions: List<String>,
+    permissionRationale: Map<String, String>,
     snackbarHostState: SnackbarHostState,
-    permissionAction: (PermissionAction) -> Unit
+    permissionAction: (Map<String,PermissionAction>) -> Unit
 ) {
 
-    val isPermissionGranted = checkIfPermissionGranted(context, permission)
+    val grantedPermissions = mutableMapOf<String, PermissionAction>()
 
-    if (isPermissionGranted) {
-        permissionAction(PermissionAction.PermissionAlreadyGranted)
-        return
-    }
+    permissions.forEach { permission ->
+        val isPermissionGranted = checkIfPermissionGranted(context, permission)
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            permissionAction(PermissionAction.PermissionGranted)
+        if (isPermissionGranted) {
+            grantedPermissions[permission] =  PermissionAction.PermissionAlreadyGranted
         }
         else {
-            permissionAction(PermissionAction.PermissionDenied)
-        }
-    }
 
-    val showPermissionRationale = shouldShowPermissionRationale(context, permission)
+            val permissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
 
-    if (showPermissionRationale) {
-        LaunchedEffect(key1 = showPermissionRationale ) {
-            val snackbarResult = snackbarHostState.showSnackbar(
-                message = permissionRationale,
-                actionLabel = "Grant Access",
-                duration = SnackbarDuration.Long
+                val action = if (isGranted) {
+                    PermissionAction.PermissionGranted
+                } else {
+                    PermissionAction.PermissionDenied
+                }
 
-            )
+                grantedPermissions[permission] = action
 
-            when(snackbarResult) {
-                SnackbarResult.Dismissed -> permissionAction(PermissionAction.PermissionDenied)
-                SnackbarResult.ActionPerformed -> permissionLauncher.launch(permission)
+                //checks if we all collected responses for all permission
+                if (grantedPermissions.size == permissions.size) {
+                    permissionAction(grantedPermissions)
+                }
             }
-        }
-    }
-    else {
-        SideEffect {
-            permissionLauncher.launch(permission)
+
+            val showPermissionRationale = shouldShowPermissionRationale(context, permission)
+
+            if (showPermissionRationale) {
+                LaunchedEffect(key1 = showPermissionRationale ) {
+
+                    val rationale = permissionRationale[permission]
+                    val snackbarResult = snackbarHostState.showSnackbar(
+                        message = rationale ?: "Permission Required",
+                        actionLabel = "Grant Access",
+                        duration = SnackbarDuration.Long
+
+                    )
+
+                    when(snackbarResult) {
+                        SnackbarResult.Dismissed -> {
+                            grantedPermissions[permission] = PermissionAction.PermissionDenied
+
+                            // Check if we have collected responses for all permissions
+                            if (grantedPermissions.size == permissions.size) {
+                                permissionAction(grantedPermissions)
+                            }
+                        }
+                        SnackbarResult.ActionPerformed -> permissionLauncher.launch(permission)
+                    }
+                }
+            }
+            else {
+                SideEffect {
+                    permissionLauncher.launch(permission)
+                }
+            }
         }
     }
 }

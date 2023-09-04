@@ -1,6 +1,5 @@
 package com.loki.profile.profile
 
-import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -33,15 +32,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,8 +49,6 @@ import com.loki.profile.ProfileViewModel
 import com.loki.ui.components.AppTopBar
 import com.loki.ui.components.ExtendedRowItem
 import com.loki.ui.components.ProfileCircleBox
-import com.loki.ui.permission.PermissionAction
-import com.loki.ui.permission.PermissionDialog
 
 @Composable
 fun ProfileScreen(
@@ -70,9 +62,6 @@ fun ProfileScreen(
     val localProfile by viewModel.localProfile.collectAsStateWithLifecycle()
     val localUser by viewModel.localUser.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    var isPermissionDialogClicked by rememberSaveable { mutableStateOf(false) }
 
     val openIntent = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -87,43 +76,6 @@ fun ProfileScreen(
                 Toast.LENGTH_LONG
             ).show()
         }
-    }
-
-    if (isPermissionDialogClicked) {
-        PermissionDialog(
-            context = context,
-            permission = Manifest.permission.CAMERA,
-            permissionRationale = Manifest.permission.CAMERA,
-            snackbarHostState = snackbarHostState,
-            permissionAction = { action ->
-
-                when (action) {
-                    is PermissionAction.PermissionGranted -> {
-                        Toast.makeText(
-                            context,
-                            "Permission Granted",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        isPermissionDialogClicked = false
-                        navigateToCamera()
-                    }
-
-                    is PermissionAction.PermissionDenied -> {
-                        Toast.makeText(
-                            context,
-                            "Permission Not Granted",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        isPermissionDialogClicked = false
-                    }
-
-                    is PermissionAction.PermissionAlreadyGranted -> {
-                        isPermissionDialogClicked = false
-                        navigateToCamera()
-                    }
-                }
-            }
-        )
     }
 
     Scaffold (
@@ -149,9 +101,7 @@ fun ProfileScreen(
                     backgroundColor = Color(localProfile.profileBackground),
                     initials = localProfile.userNameInitials,
                     imageUri = localProfile.profileImage,
-                    onEditClick = {
-                        isPermissionDialogClicked = true
-                    }
+                    onEditClick = navigateToCamera
                 )
             }
 

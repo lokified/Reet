@@ -149,6 +149,7 @@ class ReportViewModel @Inject constructor(
     fun deleteComment() {
         launchCatching {
             comments.deleteComment(editableComment.value.id)
+            message.value = "Comment Deleted"
         }
     }
 }

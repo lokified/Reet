@@ -29,6 +29,11 @@ object DateUtil {
         return dateFormat.format(date)
     }
 
+    fun getFileName(): String {
+        return SimpleDateFormat(FILE_NAME_FORMAT, Locale.ENGLISH).format(System.currentTimeMillis())
+    }
+
     private const val DATE_FORMAT = "EEE, d MMM yyyy"
     private const val TIME_FORMAT = "hh:mm a"
+    private const val FILE_NAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
 }

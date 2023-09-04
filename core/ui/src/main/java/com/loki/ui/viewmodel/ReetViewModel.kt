@@ -1,6 +1,5 @@
 package com.loki.ui.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,13 +7,10 @@ import com.google.firebase.FirebaseException
 import com.loki.local.datastore.DataStoreStorage
 import com.loki.local.datastore.model.LocalProfile
 import com.loki.local.datastore.model.LocalUser
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-
 
 open class ReetViewModel(
     private val dataStore: DataStoreStorage

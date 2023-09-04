@@ -18,7 +18,9 @@ import com.loki.auth.login.LoginScreen
 import com.loki.auth.login.LoginViewModel
 import com.loki.auth.register.RegisterScreen
 import com.loki.auth.register.RegisterViewModel
-import com.loki.camera.CameraScreen
+import com.loki.camera.camera_screen.CameraScreen
+import com.loki.camera.video_screen.VideoPlayerScreen
+import com.loki.camera.video_screen.VideoPlayerViewModel
 import com.loki.home.home.HomeScreen
 import com.loki.home.report_list.ReportListScreen
 import com.loki.home.report_list.ReportListViewModel
@@ -38,6 +40,7 @@ import com.loki.report.ReportViewModel
 import com.loki.settings.SettingsScreen
 import com.loki.settings.SettingsViewModel
 import com.loki.ui.utils.Constants.REPORT_ID
+import com.loki.ui.utils.Constants.VIDEO_URI
 import kotlinx.coroutines.delay
 
 fun NavGraphBuilder.homeNavGraph(viewModel: NavigationViewModel,onNavigateToLogin: (Screen) -> Unit) {
@@ -302,7 +305,7 @@ fun NavGraphBuilder.settingsScreen(onNavigateBack: () -> Unit, viewModel: Naviga
     }
 }
 
-fun NavGraphBuilder.cameraScreen(onNavigateBack: () -> Unit,viewModel: NavigationViewModel) {
+fun NavGraphBuilder.cameraScreen(onNavigateBack: () -> Unit, onNavigateTo: (Screen) -> Unit, viewModel: NavigationViewModel) {
     composable(
         route = Screen.CameraScreen.route,
         enterTransition = {
@@ -324,7 +327,39 @@ fun NavGraphBuilder.cameraScreen(onNavigateBack: () -> Unit,viewModel: Navigatio
         val profileViewModel = hiltViewModel<ProfileViewModel>()
         CameraScreen(
             navigateBack = onNavigateBack,
-            profileViewModel = profileViewModel
+            profileViewModel = profileViewModel,
+            navigateToVideoPlayer = { videoUri ->
+                onNavigateTo(Screen.VideoPlayerScreen.navWith(videoUri))
+            }
         )
+    }
+}
+
+fun NavGraphBuilder.videoPlayerScreen(viewModel: NavigationViewModel) {
+    composable(
+        route = Screen.VideoPlayerScreen.withVideoUri(),
+        arguments = listOf(
+            navArgument(VIDEO_URI) {
+                type = NavType.StringType
+            }
+        ),
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                animationSpec = tween(500)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                animationSpec = tween(200)
+            )
+        }
+    ) {
+        LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
+            viewModel.setBottomBarVisible(false)
+        }
+        val videoPlayerViewModel = hiltViewModel<VideoPlayerViewModel>()
+        VideoPlayerScreen(viewModel = videoPlayerViewModel)
     }
 }
