@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,7 +56,6 @@ import com.loki.ui.utils.DateUtil.formatDate
 import com.loki.ui.utils.DateUtil.formatTime
 import com.loki.ui.utils.ext.toInitials
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(
     viewModel: ReportViewModel,
@@ -65,8 +63,11 @@ fun ReportScreen(
 ) {
 
     val uiState by viewModel.state
+    val localUser by viewModel.localUser.collectAsStateWithLifecycle()
+    val localProfile by viewModel.localProfile.collectAsStateWithLifecycle()
     val comments by viewModel.commentState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
     var isReportMoreClicked by rememberSaveable { mutableStateOf(false) }
     var isCommentMoreClicked by rememberSaveable { mutableStateOf(false) }
     var isEditReportClicked by remember { mutableStateOf(false) }
@@ -194,7 +195,8 @@ fun ReportScreen(
                                 initials = profile.name.toInitials(),
                                 backgroundColor = Color(profile.profileBackgroundColor!!),
                                 initialsSize = 20,
-                                modifier = Modifier.size(40.dp)
+                                modifier = Modifier.size(40.dp),
+                                imageUri = profile.profileImage
                             )
 
                             Spacer(modifier = Modifier.width(8.dp))
@@ -235,7 +237,7 @@ fun ReportScreen(
                                         shape = RoundedCornerShape(8.dp),
                                         color = MaterialTheme.colorScheme.onSecondary
                                     )
-                                    .height(200.dp)
+                                    .height(400.dp)
                             ) {
                                 AsyncImage(
                                     model = it,
@@ -243,7 +245,7 @@ fun ReportScreen(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .clip(RoundedCornerShape(12.dp)),
-                                    contentScale = ContentScale.Crop,
+                                    contentScale = ContentScale.FillBounds
                                 )
                             }
                         }
@@ -309,7 +311,7 @@ fun ReportScreen(
                             isCommentMoreClicked = true
                             viewModel.onCommentIdChange(matchedComment.comment)
                                       },
-                        isUserMatched = viewModel.localUser.value.userId == matchedComment.comment.userId,
+                        isUserMatched = localUser.userId == matchedComment.comment.userId,
                         modifier = Modifier.padding(
                             vertical = 4.dp,
                             horizontal = 16.dp
@@ -338,10 +340,11 @@ fun ReportScreen(
                 ) {
 
                     ProfileCircleBox(
-                        initials = viewModel.localUser.value.name.toInitials(),
-                        backgroundColor = Color(viewModel.localProfile.value.profileBackground),
+                        initials = localProfile.userNameInitials,
+                        backgroundColor = Color(localProfile.profileBackground),
                         initialsSize = 15,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(30.dp),
+                        imageUri = localProfile.profileImage
                     )
 
                     Spacer(modifier = Modifier.width(4.dp))
@@ -359,8 +362,9 @@ fun ReportScreen(
                             .width((deviceWidth - (deviceWidth / 2.4)).dp)
                             .clip(RoundedCornerShape(12.dp)),
                         enabled = !viewModel.isLoading.value,
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(.02f),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.primary.copy(.02f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.primary.copy(.02f),
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent,

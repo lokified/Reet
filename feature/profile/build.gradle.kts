@@ -52,6 +52,7 @@ dependencies {
     debugImplementation(libs.bundles.compose.debug)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
+    implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.hilt)
     kapt(libs.bundles.hilt.kapt)
     implementation(platform(libs.firebase.bom))

@@ -1,7 +1,6 @@
 package com.loki.navigation.ext
 
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.loki.navigation.Screen
 
 fun NavController.navigateTo(
@@ -15,8 +14,10 @@ fun NavController.navigateTo(
     } ?: screen.route
 
     navigate(route) {
-        popUpTo(graph.findStartDestination().id) {
-            saveState = true
+        if (screen.icon != null) {
+            popUpTo(Screen.ReportListScreen.route) {
+                saveState = true
+            }
         }
         launchSingleTop = true
         restoreState = screen.restoreState

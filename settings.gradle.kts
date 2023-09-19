@@ -1,4 +1,3 @@
-include(":feature:settings")
 
 pluginManagement {
     repositories {
@@ -30,3 +29,5 @@ include(":feature:profile")
 include(":data:remote")
 include(":data:local")
 include(":di")
+include(":feature:camera")
+include(":feature:settings")

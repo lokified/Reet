@@ -2,7 +2,6 @@ package com.loki.auth.login
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.FirebaseException
 import com.loki.auth.util.ext.isValidEmail
 import com.loki.local.datastore.DataStoreStorage
 import com.loki.local.datastore.model.LocalProfile
@@ -11,6 +10,7 @@ import com.loki.remote.auth.AuthRepository
 import com.loki.remote.model.Profile
 import com.loki.remote.profiles.ProfilesRepository
 import com.loki.ui.utils.ColorUtil
+import com.loki.ui.utils.ext.toInitials
 import com.loki.ui.viewmodel.ReetViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -35,6 +35,9 @@ class LoginViewModel @Inject constructor(
 
     private val userName
         get() = state.value.userName
+
+    private var userId = mutableStateOf("")
+    var names = mutableStateOf("")
 
     var isProfileSheetVisible = mutableStateOf(false)
     private var localProfileState = mutableStateOf(LocalProfileState())
@@ -87,54 +90,45 @@ class LoginViewModel @Inject constructor(
 
         launchCatching {
 
-            try {
-                isLoading.value = true
+            //logins user
+            val user  = auth.authenticate(
+                email = email,
+                password = password
+            )
 
-                //logins user
-                val user  = auth.authenticate(
-                    email = email,
-                    password = password
+            names.value = user.username
+
+            //checks if user has remote profile
+            val isProfile = getRemoteProfile(user.id)
+
+            if (isProfile) {
+                // saves logged in user
+                updateUser(
+                    LocalUser(
+                        userId = user.id,
+                        email = user.email,
+                        name = user.username,
+                        isLoggedIn = true
+                    )
                 )
-
-                completeProfileUserName.value = user.username
-
-                //checks if user has remote profile
-                val isProfile = getRemoteProfile(user.id)
-
-
-                if (isProfile) {
-                    // saves logged in user
-                    updateUser(
-                        LocalUser(
-                            userId = user.id,
-                            email = user.email,
-                            name = user.username,
-                            isLoggedIn = true
-                        )
+                //update local profile
+                updateProfile(
+                    LocalProfile(
+                        id = localProfileState.value.id,
+                        userName = localProfileState.value.username,
+                        userNameInitials = names.value.toInitials(),
+                        profileBackground = localProfileState.value.profileBackground!!,
+                        profileImage = localProfileState.value.profileImage
                     )
-                    //update local profile
-                    updateProfile(
-                        LocalProfile(
-                            id = localProfileState.value.id,
-                            userName = localProfileState.value.username,
-                            profileBackground = localProfileState.value.profileBackground!!
-                        )
-                    )
-                    isLoading.value = false
-                    delay(1000L)
-                    resetField()
-                    navigateToHome()
-                }
-                isLoading.value = false
-
-                if (!isProfile) {
-                    isProfileSheetVisible.value = true
-                    return@launchCatching
-                }
+                )
+                delay(2000L)
+                resetField()
+                navigateToHome()
             }
-            catch (e: FirebaseException) {
-                isLoading.value = false
-                errorMessage.value = e.message ?: "something went wrong"
+
+            if (!isProfile) {
+                isProfileSheetVisible.value = true
+                return@launchCatching
             }
         }
     }
@@ -156,55 +150,48 @@ class LoginViewModel @Inject constructor(
         }
 
         launchCatching {
-            try {
-                isLoading.value = true
+            val color = ColorUtil.profileBackgroundColors.random()
 
-                val color = ColorUtil.profileBackgroundColors.random()
-
-                // setsUpProfile
-                profileRepository.setUpProfile(
-                    Profile(
-                        userName = userName,
-                        name = completeProfileUserName.value,
-                        profileBackgroundColor = color,
-                        userId = userId.value
-                    )
+            // setsUpProfile
+            profileRepository.setUpProfile(
+                Profile(
+                    userName = userName,
+                    name = names.value,
+                    profileBackgroundColor = color,
+                    userId = userId.value
                 )
+            )
 
-                delay(1000L)
-                // get remote profile again to get profile id
-                getRemoteProfile(
-                    id = userId.value,
+            delay(1000L)
+            // get remote profile again to get profile id
+            getRemoteProfile(
+                id = userId.value,
+            )
+
+            delay(2000L)
+            //update local profile
+            updateProfile(
+                LocalProfile(
+                    id = localProfileState.value.id,
+                    userName = userName,
+                    userNameInitials = names.value.toInitials(),
+                    profileBackground = color
                 )
+            )
 
-                delay(2000L)
-                //update local profile
-                updateProfile(
-                    LocalProfile(
-                        id = localProfileState.value.id,
-                        userName = userName,
-                        profileBackground = color
-                    )
+            delay(3000L)
+            //saves logged in user
+            updateUser(
+                LocalUser(
+                    userId = userId.value,
+                    email = email,
+                    name = names.value,
+                    isLoggedIn = true
                 )
+            )
 
-                delay(3000L)
-                //saves logged in user
-                updateUser(
-                    LocalUser(
-                        userId = userId.value,
-                        email = email,
-                        name = completeProfileUserName.value,
-                        isLoggedIn = true
-                    )
-                )
-
-                resetField()
-                navigateToHome()
-            }
-            catch (e: FirebaseException) {
-                isLoading.value = false
-                errorMessage.value = e.message ?: "something went wrong"
-            }
+            resetField()
+            navigateToHome()
         }
     }
 
@@ -217,7 +204,8 @@ class LoginViewModel @Inject constructor(
             localProfileState.value = LocalProfileState(
                 id = remoteProfile.id,
                 username = remoteProfile.userName,
-                profileBackground = remoteProfile.profileBackgroundColor
+                profileBackground = remoteProfile.profileBackgroundColor,
+                profileImage = remoteProfile.profileImage
             )
         }
 

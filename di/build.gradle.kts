@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.androidx.datastore)
 
     implementation(libs.bundles.retrofit)
+    implementation(libs.bundles.exoPlayer)
 
     testImplementation(libs.bundles.test.common)
     androidTestImplementation(libs.bundles.android.test)

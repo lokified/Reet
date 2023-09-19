@@ -52,6 +52,7 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.bundles.lifecycle)
+    implementation(libs.coil.kt.compose)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)

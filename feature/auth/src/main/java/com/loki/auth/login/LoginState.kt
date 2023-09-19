@@ -15,5 +15,6 @@ data class LoginState(
 data class LocalProfileState(
     val id: String = "",
     val username: String = "",
-    val profileBackground: Long? = null
+    val profileBackground: Long? = null,
+    val profileImage: String = ""
 )

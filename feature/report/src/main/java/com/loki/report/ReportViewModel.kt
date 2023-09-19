@@ -42,8 +42,6 @@ class ReportViewModel @Inject constructor(
     val editableComment = mutableStateOf(Comment())
 
     init {
-        getLocalProfile()
-        getUser()
         savedStateHandle.get<String>(REPORT_ID)?.let { reportId ->
             getReport(reportId)
             getComments(reportId)
@@ -151,6 +149,7 @@ class ReportViewModel @Inject constructor(
     fun deleteComment() {
         launchCatching {
             comments.deleteComment(editableComment.value.id)
+            message.value = "Comment Deleted"
         }
     }
 }

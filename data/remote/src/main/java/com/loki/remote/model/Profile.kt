@@ -8,5 +8,6 @@ data class Profile(
     val name: String = "",
     val userName: String = "",
     val profileBackgroundColor: Long? = null,
+    val profileImage: String = "",
     val userId: String = ""
 )

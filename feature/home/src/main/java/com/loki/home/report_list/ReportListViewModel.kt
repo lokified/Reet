@@ -21,8 +21,6 @@ class ReportListViewModel @Inject constructor(
     val reportsUiState = _reportUiState.asStateFlow()
 
     init {
-        getUser()
-        getLocalProfile()
         getReports()
     }
 

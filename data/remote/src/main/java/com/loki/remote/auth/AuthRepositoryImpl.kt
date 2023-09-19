@@ -1,6 +1,5 @@
 package com.loki.remote.auth
 
-import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.perf.ktx.trace
@@ -60,24 +59,6 @@ class AuthRepositoryImpl @Inject constructor(
                 }
 
             }.await().user?.uid
-        }
-    }
-
-    override suspend fun updateUser(name: String?, profilePhoto: String?) {
-        trace(UPDATE_USER_TRACE) {
-            val request = UserProfileChangeRequest.Builder()
-            if (name != null) {
-                request.apply {
-                    displayName = name
-                }
-            }
-
-            if (profilePhoto != null) {
-                request.apply {
-                    photoUri = profilePhoto.toUri()
-                }
-            }
-            auth.currentUser?.updateProfile(request.build())
         }
     }
 

@@ -2,6 +2,7 @@ package com.loki.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.loki.remote.auth.AuthRepository
 import com.loki.remote.auth.AuthRepositoryImpl
 import com.loki.remote.profiles.ProfilesRepository
@@ -26,7 +27,7 @@ object AuthRepositoryModule {
 
     @Provides
     @Singleton
-    fun provideProfileRepository(storage: FirebaseFirestore): ProfilesRepository {
-        return ProfilesRepositoryImpl(storage)
+    fun provideProfileRepository(storage: FirebaseFirestore, store: FirebaseStorage): ProfilesRepository {
+        return ProfilesRepositoryImpl(storage, store)
     }
 }

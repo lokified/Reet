@@ -64,6 +64,7 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:report"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:camera"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

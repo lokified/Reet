@@ -6,6 +6,9 @@ on:
       - 'master'
     tags:
       - 'v*'
+  pull_request:
+    types:
+      - closed
 
 jobs:
   apk:
@@ -34,7 +37,7 @@ jobs:
         run: bash ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: apk
           path: app/build/outputs/apk/debug/app-debug.apk
@@ -46,7 +49,7 @@ jobs:
 
     steps:
       - name: Download APK from build
-        uses: actions/download-artifact@v1
+        uses: actions/download-artifact@v2
         with:
           name: apk
 
@@ -56,12 +59,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v2.0.0
-          release_name: ${{ github.event.repository.name }} v2.0.0
+          tag_name: v0.3.0-beta
+          release_name: ${{ github.event.repository.name }} v0.3.0-beta
 
       - name: Upload Release APK
         id: upload_release_asset
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

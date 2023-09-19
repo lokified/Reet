@@ -12,4 +12,6 @@ interface ProfilesRepository {
     suspend fun setUpProfile(profile: Profile)
 
     suspend fun updateUsername(profile: Profile)
+
+    suspend fun updateProfileImage(profile: Profile)
 }

@@ -1,7 +1,6 @@
 package com.loki.auth.register
 
 import androidx.compose.runtime.mutableStateOf
-import com.google.firebase.FirebaseException
 import com.loki.auth.util.ext.isValidEmail
 import com.loki.auth.util.ext.passwordMatches
 import com.loki.local.datastore.DataStoreStorage
@@ -35,6 +34,9 @@ class RegisterViewModel @Inject constructor(
         get() = state.value.conPassword
     private val userName
         get() = state.value.userName
+
+    private var userId = mutableStateOf("")
+    var names = mutableStateOf("")
 
     fun onFirstNameChange(newValue: String) {
         state.value = state.value.copy(firstName = newValue.trim())
@@ -92,27 +94,18 @@ class RegisterViewModel @Inject constructor(
         }
 
         launchCatching {
-            try {
-                isLoading.value = true
-
-                // sets up remote Profile
-                profile.setUpProfile(
-                    Profile(
-                        userName = userName,
-                        name = "$firstName $lastName",
-                        profileBackgroundColor = ColorUtil.profileBackgroundColors.random(),
-                        userId = userId.value
-                    )
+            // sets up remote Profile
+            profile.setUpProfile(
+                Profile(
+                    userName = userName,
+                    name = "$firstName $lastName",
+                    profileBackgroundColor = ColorUtil.profileBackgroundColors.random(),
+                    userId = userId.value
                 )
+            )
 
-                resetField()
-                isLoading.value = false
-                navigateToLogin()
-            }
-            catch (e: FirebaseException) {
-                isLoading.value = false
-                errorMessage.value = e.message ?: "something went wrong"
-            }
+            resetField()
+            navigateToLogin()
         }
     }
 
@@ -159,28 +152,17 @@ class RegisterViewModel @Inject constructor(
         }
 
         launchCatching {
+            //creates new account
+            val id = auth.createAccount(
+                names = "$firstName $lastName",
+                email = email,
+                password = password
+            )
 
-            try {
-                isLoading.value = true
+            names.value = "$firstName $lastName"
+            userId.value = id!!
 
-                //creates new account
-                val id = auth.createAccount(
-                    names = "$firstName $lastName",
-                    email = email,
-                    password = password
-                )
-
-                completeProfileUserName.value = "$firstName $lastName"
-
-                userId.value = id!!
-
-                isLoading.value = false
-                onRegister()
-            }
-            catch (e: FirebaseException) {
-                isLoading.value = false
-                errorMessage.value = e.message ?: "something went wrong"
-            }
+            onRegister()
         }
     }
 

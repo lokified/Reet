@@ -57,4 +57,5 @@ dependencies {
     implementation(libs.bundles.unitTests)
     implementation(platform(libs.firebase.bom))
     implementation(libs.bundles.firebase)
+    implementation(libs.bundles.cameraX)
 }

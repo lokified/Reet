@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
 object TextFieldColorUtil {
 
     @Composable
-    fun defaultColorField(isDarkTheme: Boolean) =  if (isDarkTheme) MaterialTheme.colorScheme.onBackground
+    private fun defaultColorField(isDarkTheme: Boolean) =  if (isDarkTheme) MaterialTheme.colorScheme.onBackground
         else MaterialTheme.colorScheme.primary
 
     @Composable
@@ -18,5 +18,6 @@ object TextFieldColorUtil {
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
         focusedLabelColor =  defaultColorField(isDarkTheme),
+        disabledContainerColor = Color.Transparent
     )
 }

@@ -65,4 +65,5 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:report"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:camera"))
 }

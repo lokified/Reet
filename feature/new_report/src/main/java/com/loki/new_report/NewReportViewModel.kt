@@ -26,16 +26,11 @@ class NewReportViewModel @Inject constructor(
     private val imageUri
         get() = state.value.imageUri
 
-    init {
-        getUser()
-        getLocalProfile()
-    }
-
     fun onChangeReportContent(newValue: String) {
         state.value = state.value.copy(reportContent = newValue)
     }
 
-    fun onChangeImageUri(newValue: Uri) {
+    fun onChangeImageUri(newValue: Uri?) {
         state.value = state.value.copy(imageUri = newValue)
     }
 
