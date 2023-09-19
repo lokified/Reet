@@ -11,14 +11,15 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun Loading(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    alignment: Alignment = Alignment.Center
 ) {
     Box(
         modifier = modifier.fillMaxSize()
             .background(
                 MaterialTheme.colorScheme.background.copy(.5f)
             ),
-        contentAlignment = Alignment.Center
+        contentAlignment = alignment
     ) {
         CircularProgressIndicator()
     }

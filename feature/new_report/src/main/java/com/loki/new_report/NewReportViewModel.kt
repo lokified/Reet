@@ -30,7 +30,7 @@ class NewReportViewModel @Inject constructor(
         state.value = state.value.copy(reportContent = newValue)
     }
 
-    fun onChangeImageUri(newValue: Uri) {
+    fun onChangeImageUri(newValue: Uri?) {
         state.value = state.value.copy(imageUri = newValue)
     }
 

@@ -1,11 +1,14 @@
 package com.loki.new_report
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +18,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.sharp.Cancel
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,16 +49,18 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.loki.ui.components.AppTopBar
+import com.loki.ui.components.Loading
 import com.loki.ui.components.ProfileCircleBox
 import kotlinx.coroutines.job
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewReportScreen(
     viewModel: NewReportViewModel,
-    navigateToHome: () -> Unit
+    navigateToHome: () -> Unit,
+    navigateToCamera: () -> Unit
 ) {
 
+    val isDarkTheme by viewModel.isDarkTheme
     val uiState by viewModel.state
     val localProfile by viewModel.localProfile.collectAsStateWithLifecycle()
 
@@ -99,6 +104,12 @@ fun NewReportScreen(
         }
     }
 
+    if (viewModel.isLoading.value) {
+        Loading(
+            alignment = Alignment.TopCenter
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
 
         AppTopBar(
@@ -111,7 +122,8 @@ fun NewReportScreen(
                     onClick = {
                         viewModel.addReport(navigateToHome)
                     },
-                    enabled = !viewModel.isLoading.value && uiState.reportContent.isNotBlank()
+                    enabled = !viewModel.isLoading.value &&
+                            (uiState.reportContent.isNotBlank() || uiState.imageUri != null)
                 ) {
                     Text(text = "Add")
                 }
@@ -131,6 +143,9 @@ fun NewReportScreen(
 
         Column {
 
+            val containerColor = if (isDarkTheme) MaterialTheme.colorScheme.primary.copy(.2f)
+            else MaterialTheme.colorScheme.primary.copy(.05f)
+
             TextField(
                 value = uiState.reportContent,
                 onValueChange = viewModel::onChangeReportContent,
@@ -143,13 +158,14 @@ fun NewReportScreen(
                     .height(150.dp)
                     .focusRequester(focusRequester),
                 enabled = !viewModel.isLoading.value,
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = if (viewModel.isDarkTheme.value) MaterialTheme.colorScheme.primary.copy(.2f)
-                        else MaterialTheme.colorScheme.primary.copy(.05f),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = containerColor,
+                    unfocusedContainerColor = containerColor,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = if (viewModel.isDarkTheme.value) MaterialTheme.colorScheme.onBackground
-                        else MaterialTheme.colorScheme.primary
+                    cursorColor = if (isDarkTheme) MaterialTheme.colorScheme.onBackground
+                        else MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = Color.Transparent
                 ),
             )
 
@@ -158,34 +174,61 @@ fun NewReportScreen(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.padding(16.dp)
             ) {
-
                 IconButton(
-                    onClick = {
-                        isGalleryClicked = true
-                    }
+                    onClick = navigateToCamera
                 ) {
-
-                    Icon(
-                        imageVector = Icons.Filled.Image,
-                        contentDescription = "Gallery_icon"
-                    )
+                    Icon(imageVector = Icons.Filled.CameraAlt, contentDescription = "Camera_icon")
                 }
             }
 
 
             uiState.imageUri?.let {
-                Image(
-                    painter = rememberAsyncImagePainter(model = it),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(vertical = 4.dp, horizontal = 16.dp)
-                        .fillMaxWidth()
-                        .height(300.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
+                ImageContainer(
+                    imageUri = it,
+                    onDeleteClick = {
+                        viewModel.onChangeImageUri(null)
+                    }
                 )
             }
         }
+    }
+}
 
+@Composable
+fun ImageContainer(
+    imageUri: Uri,
+    onDeleteClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 16.dp)
+            .height(300.dp)
+            .clip(RoundedCornerShape(8.dp))
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(model = imageUri),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(.5f))
+        ) {
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Icon(
+                    imageVector = Icons.Sharp.Cancel,
+                    contentDescription = "cancel icon"
+                )
+            }
+        }
     }
 }

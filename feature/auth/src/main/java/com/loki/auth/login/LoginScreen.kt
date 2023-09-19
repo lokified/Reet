@@ -54,7 +54,7 @@ fun LoginScreen(
     val uiState by viewModel.state
     val isDarkTheme by viewModel.isDarkTheme
 
-    val keyboardController = LocalSoftwareKeyboardController.current
+    //val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -158,7 +158,7 @@ fun LoginScreen(
 
             Button(
                 onClick = {
-                    keyboardController?.hide()
+                    //keyboardController?.hide()
                     viewModel.login(
                         navigateToHome = {
                             Toast.makeText(

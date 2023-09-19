@@ -13,7 +13,7 @@ import androidx.core.view.WindowCompat
 object StatusBarUtil {
 
     @Composable
-    fun statusBarColor() = MaterialTheme.colorScheme.background.toArgb()
+    fun defaultStatusBarColor() = MaterialTheme.colorScheme.background.toArgb()
 
     @Composable
     fun defaultNavColor(darkTheme: Boolean) =
@@ -24,7 +24,7 @@ object StatusBarUtil {
     fun DefaultStatusColors(
         view: View,
         isDark: Boolean,
-        statusBarColor: Int = statusBarColor(),
+        statusBarColor: Int = defaultStatusBarColor(),
         navigationBarColor: Int = defaultNavColor(isDark),
     ) {
 

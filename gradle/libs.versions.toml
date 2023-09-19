@@ -2,14 +2,14 @@
 
 androidGradlePlugin = "8.0.2"
 androidxActivity = "1.7.2"
-androidxComposeBom = "2023.06.01"
+androidxComposeBom = "2023.09.00"
 androidxComposeCompiler = "1.4.4"
 androidxCore = "1.10.1"
 androidxComposeMaterial3 = "1.1.1"
 androidxCoreSplashscreen = "1.0.1"
 androidxEspresso = "3.5.1"
-androidxLifecycle = "2.6.1"
-androidxNavigation = "2.7.1"
+androidxLifecycle = "2.6.2"
+androidxNavigation = "2.7.2"
 androidxTestCore = "1.5.0"
 androidxTestExt = "1.1.5"
 androidxTestRules = "1.5.0"
@@ -17,7 +17,7 @@ androidxTestRunner = "1.5.2"
 androidxDataStore = "1.0.0"
 junit4 = "4.13.2"
 kotlin = "1.8.21"
-kotlinxCoroutines = "1.6.4"
+kotlinxCoroutines = "1.7.1"
 retrofit = "2.9.0"
 okHttp3 = "4.10.0"
 room = "2.5.2"
@@ -33,7 +33,7 @@ firebaseBom = "32.2.2"
 googleServices = "4.3.15"
 firebasePerf = "1.4.2"
 firebaseCrash = "2.9.6"
-kotlinxPlayService = "1.6.4"
+kotlinxPlayService = "1.7.1"
 ktlint = "11.0.0"
 spotless = "6.19.0"
 archCoreTest = "2.2.0"
@@ -43,7 +43,6 @@ mockitoInline = "3.11.2"
 camerax = "1.3.0-rc01"
 junit = "1.1.5"
 appcompat = "1.6.1"
-material = "1.8.0"
 exoPlayer = "1.1.1"
 accompanistPermission = "0.33.1-alpha"
 
@@ -152,7 +151,6 @@ permissions = { group = "com.google.accompanist", name = "accompanist-permission
 
 junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

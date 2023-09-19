@@ -19,68 +19,71 @@ import androidx.core.content.ContextCompat
 fun PermissionDialog(
     context: Context,
     permissions: List<String>,
+    permissionToRequest: List<String>? = null,
     permissionRationale: Map<String, String>,
     snackbarHostState: SnackbarHostState,
     permissionAction: (Map<String,PermissionAction>) -> Unit
 ) {
 
     val grantedPermissions = mutableMapOf<String, PermissionAction>()
+    val permissionToRequestSet = permissionToRequest?.toSet()
 
     permissions.forEach { permission ->
-        val isPermissionGranted = checkIfPermissionGranted(context, permission)
 
-        if (isPermissionGranted) {
-            grantedPermissions[permission] =  PermissionAction.PermissionAlreadyGranted
-        }
-        else {
+        if (permissionToRequestSet == null || permissionToRequestSet.contains(permission)) {
+            val isPermissionGranted = checkIfPermissionGranted(context, permission)
 
-            val permissionLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted ->
+            if (isPermissionGranted) {
+                grantedPermissions[permission] = PermissionAction.PermissionGranted
+            } else {
 
-                val action = if (isGranted) {
-                    PermissionAction.PermissionGranted
-                } else {
-                    PermissionAction.PermissionDenied
-                }
+                val permissionLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { isGranted ->
 
-                grantedPermissions[permission] = action
+                    val action = if (isGranted) {
+                        PermissionAction.PermissionGranted
+                    } else {
+                        PermissionAction.PermissionDenied
+                    }
 
-                //checks if we all collected responses for all permission
-                if (grantedPermissions.size == permissions.size) {
-                    permissionAction(grantedPermissions)
-                }
-            }
+                    grantedPermissions[permission] = action
 
-            val showPermissionRationale = shouldShowPermissionRationale(context, permission)
-
-            if (showPermissionRationale) {
-                LaunchedEffect(key1 = showPermissionRationale ) {
-
-                    val rationale = permissionRationale[permission]
-                    val snackbarResult = snackbarHostState.showSnackbar(
-                        message = rationale ?: "Permission Required",
-                        actionLabel = "Grant Access",
-                        duration = SnackbarDuration.Long
-
-                    )
-
-                    when(snackbarResult) {
-                        SnackbarResult.Dismissed -> {
-                            grantedPermissions[permission] = PermissionAction.PermissionDenied
-
-                            // Check if we have collected responses for all permissions
-                            if (grantedPermissions.size == permissions.size) {
-                                permissionAction(grantedPermissions)
-                            }
-                        }
-                        SnackbarResult.ActionPerformed -> permissionLauncher.launch(permission)
+                    //checks if we all collected responses for all permission
+                    if (grantedPermissions.size == permissions.size) {
+                        permissionAction(grantedPermissions)
                     }
                 }
-            }
-            else {
-                SideEffect {
-                    permissionLauncher.launch(permission)
+
+                val showPermissionRationale = shouldShowPermissionRationale(context, permission)
+
+                if (showPermissionRationale) {
+                    LaunchedEffect(key1 = showPermissionRationale) {
+
+                        val rationale = permissionRationale[permission]
+                        val snackbarResult = snackbarHostState.showSnackbar(
+                            message = rationale ?: "Permission Required",
+                            actionLabel = "Grant Access",
+                            duration = SnackbarDuration.Long
+                        )
+
+                        when (snackbarResult) {
+                            SnackbarResult.Dismissed -> {
+                                grantedPermissions[permission] = PermissionAction.PermissionDenied
+
+                                // Check if we have collected responses for all permissions
+                                if (grantedPermissions.size == permissions.size) {
+                                    permissionAction(grantedPermissions)
+                                }
+                            }
+
+                            SnackbarResult.ActionPerformed -> permissionLauncher.launch(permission)
+                        }
+                    }
+                } else {
+                    SideEffect {
+                        permissionLauncher.launch(permission)
+                    }
                 }
             }
         }

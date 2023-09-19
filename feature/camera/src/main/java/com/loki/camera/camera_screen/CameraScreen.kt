@@ -1,7 +1,9 @@
 package com.loki.camera.camera_screen
 
 import android.Manifest
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -12,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,9 +27,11 @@ import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -42,51 +47,67 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.rememberAsyncImagePainter
+import com.loki.camera.R
 import com.loki.camera.util.StatusBarUtil
 import com.loki.profile.ProfileViewModel
 import com.loki.ui.components.Loading
 import com.loki.ui.permission.PermissionAction
 import com.loki.ui.permission.PermissionDialog
+import com.loki.ui.permission.checkIfPermissionGranted
 import com.loki.ui.theme.md_theme_dark_background
 import com.loki.ui.theme.md_theme_dark_secondaryContainer
+import com.loki.ui.utils.Constants.SCREEN_TYPE_BOTH
+import com.loki.ui.utils.Constants.SCREEN_TYPE_PROFILE_CAMERA
+import com.loki.ui.utils.Constants.SCREEN_TYPE_REPORT_CAMERA
 
 private val EMPTY_IMAGE_URI: Uri = Uri.parse("file://dev/null")
 
 @Composable
 fun CameraScreen(
     profileViewModel: ProfileViewModel,
+    screenType: String,
     navigateToVideoPlayer: (uri: String) -> Unit,
+    onSaveImage: (imageUri: Uri, screenSource: String) -> Unit,
     navigateBack: () -> Unit
 ) {
 
-    val appTheme by profileViewModel.isDarkTheme
+    val isDarkTheme by profileViewModel.isDarkTheme
 
     val context = LocalContext.current
     val view = LocalView.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycle = lifecycleOwner.lifecycle
 
     val snackbarHostState = remember { SnackbarHostState() }
     var showPermissionDialog by remember { mutableStateOf(false) }
     var isPermissionGranted by remember { mutableStateOf(false) }
 
+    // preview
+    var screenPreview by remember { mutableStateOf(ScreenPreview.CAMERA) }
+
     // camera states
-    var isCameraView by remember { mutableStateOf(true) }
     var imageUri by remember { mutableStateOf(EMPTY_IMAGE_URI) }
     var isGalleryClicked by rememberSaveable { mutableStateOf(false) }
 
     // if not dark theme change colors to dark theme in this screen composable
     var statusBarColor by remember { mutableStateOf(md_theme_dark_background.toArgb()) }
-    var isDark by remember { mutableStateOf(appTheme) }
+    var isDark by remember { mutableStateOf(isDarkTheme) }
     var navBarColor by remember { mutableStateOf(md_theme_dark_background.toArgb()) }
 
-    val defaultNavColor = StatusBarUtil.defaultNavColor(darkTheme = appTheme)
-    val defaultStatusBarColor = StatusBarUtil.statusBarColor()
+    val defaultNavColor = StatusBarUtil.defaultNavColor(darkTheme = isDarkTheme)
+    val defaultStatusBarColor = StatusBarUtil.defaultStatusBarColor()
 
-    if (!appTheme) {
+    if (!isDarkTheme) {
         StatusBarUtil.DefaultStatusColors(
             view = view,
             isDark = isDark,
@@ -102,16 +123,46 @@ fun CameraScreen(
         }
     }
 
+    // permissions for camera and audio recorder
     val permissions = listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
     val permissionRationales = mapOf(
         Manifest.permission.CAMERA to "Camera permission is required for taking photos and video recording",
         Manifest.permission.RECORD_AUDIO to "Record Audio permission is required for video recording"
     )
+    val permissionToRequest = if (screenType == SCREEN_TYPE_PROFILE_CAMERA || screenType == SCREEN_TYPE_REPORT_CAMERA)
+        listOf(Manifest.permission.CAMERA) else permissions
+
+    LaunchedEffect(key1 = showPermissionDialog, key2 = isPermissionGranted) {
+        showPermissionDialog = true
+
+        val isGranted = checkIfPermissionGranted(context, Manifest.permission.CAMERA)
+        isPermissionGranted = isGranted
+    }
+
+    // onresume, check if permission was allowed
+    DisposableEffect(key1 = lifecycle) {
+        val lifecycleObserver = LifecycleEventObserver { _, event ->
+            when(event) {
+                Lifecycle.Event.ON_RESUME -> {
+                    val isGranted = checkIfPermissionGranted(context, Manifest.permission.CAMERA)
+                    isPermissionGranted = isGranted
+                }
+                else -> {}
+            }
+        }
+
+        lifecycle.addObserver(lifecycleObserver)
+
+        onDispose {
+            lifecycle.removeObserver(lifecycleObserver)
+        }
+    }
 
     if (showPermissionDialog) {
         PermissionDialog(
             context = context,
             permissions = permissions,
+            permissionToRequest = permissionToRequest,
             permissionRationale = permissionRationales,
             snackbarHostState = snackbarHostState,
             permissionAction = { permissionsAction ->
@@ -120,24 +171,10 @@ fun CameraScreen(
                     when (action) {
                         is PermissionAction.PermissionGranted -> {
                             isPermissionGranted = true
-                            Toast.makeText(
-                                context,
-                                "Permission Granted",
-                                Toast.LENGTH_SHORT
-                            ).show()
                         }
 
                         is PermissionAction.PermissionDenied -> {
                             isPermissionGranted = false
-                            Toast.makeText(
-                                context,
-                                "Permission Not Granted",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
-                        is PermissionAction.PermissionAlreadyGranted -> {
-                            isPermissionGranted = true
                         }
                     }
                 }
@@ -180,7 +217,7 @@ fun CameraScreen(
             ).show()
         }
     }
-
+    
     if (imageUri != EMPTY_IMAGE_URI) {
 
         Box(
@@ -223,9 +260,10 @@ fun CameraScreen(
                     containerColor = md_theme_dark_secondaryContainer
                 ),
                 onClick = {
-                    profileViewModel.updateProfilePicture(imageUri) {
-                        navigateBack()
-                    }
+                    statusBarColor = defaultStatusBarColor
+                    navBarColor = defaultNavColor
+                    isDark = !isDark
+                    onSaveImage(imageUri, screenType)
                 }
             ) {
                 Image(
@@ -245,7 +283,35 @@ fun CameraScreen(
 
     } else {
 
-        if (isCameraView) {
+        if (!isPermissionGranted) {
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center)
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.allow_permissions),
+                        textAlign = TextAlign.Center
+                    )
+                    OutlinedButton(
+                        onClick = {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            val uri = Uri.fromParts("package", context.packageName, null)
+                            intent.data = uri
+                            context.startActivity(intent)
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(R.string.open_settings),
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+        } else {
 
             Box(
                 modifier = Modifier
@@ -254,46 +320,34 @@ fun CameraScreen(
             ) {
                 CameraCapture(
                     modifier = Modifier.fillMaxSize(),
-                    isCameraView = isCameraView,
-                    isPermissionGranted = isPermissionGranted,
+                    screenPreview = screenPreview,
                     onImageUri = { uri ->
                         imageUri = uri
                     },
-                    onPermissionRequired = {
-                        showPermissionDialog = it
+                    onVideoOutput = { output ->
+                        output.uri?.let(navigateToVideoPlayer)
                     },
                     onGalleryClick = {
                         isGalleryClicked = true
+                    },
+                    onErrorMessage = {
+                        Toast.makeText(
+                            context,
+                            it,
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 ) {
-                    BottomContent(
-                        onViewSelected = {
-                            isCameraView = it == Preview.CAMERA
-                        }
-                    )
+
+                    if (screenType == SCREEN_TYPE_BOTH) {
+                        BottomContent(
+                            onViewSelected = {
+                                screenPreview = it
+                            }
+                        )
+                    }
                 }
             }
-
-        } else {
-
-            VideoCapture(
-                modifier = Modifier.fillMaxSize(),
-                isCameraView = isCameraView,
-                isPermissionGranted = isPermissionGranted,
-                onVideoUri = { uri ->
-                    uri?.let(navigateToVideoPlayer)
-                },
-                onPermissionRequired = {
-                      showPermissionDialog = it
-                },
-                bottomSwitchContent = {
-                    BottomContent(
-                        onViewSelected = {
-                            isCameraView = it == Preview.CAMERA
-                        }
-                    )
-                }
-            )
         }
     }
 }
@@ -301,7 +355,7 @@ fun CameraScreen(
 @Composable
 fun BottomContent(
     modifier: Modifier = Modifier,
-    onViewSelected: (Preview) -> Unit
+    onViewSelected: (ScreenPreview) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -309,6 +363,7 @@ fun BottomContent(
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
+
 
         val titles = listOf("Camera", "Video")
         var selectedTitle by remember { mutableStateOf(titles[0]) }
@@ -318,19 +373,17 @@ fun BottomContent(
             horizontalArrangement = Arrangement.Center
         ) {
 
-            titles.forEachIndexed { index, title ->
-
-                val selected = titles[index] == title
+            titles.forEachIndexed { _, title ->
 
                 PreviewSelectables(
                     title = title,
-                    selected = selected,
+                    selected = selectedTitle == title,
                     onClick = {
                         selectedTitle = title
                         if (title == "Camera") {
-                            onViewSelected(Preview.CAMERA)
+                            onViewSelected(ScreenPreview.CAMERA)
                         } else {
-                            onViewSelected(Preview.VIDEO)
+                            onViewSelected(ScreenPreview.VIDEO)
                         }
                     }
                 )
@@ -339,7 +392,7 @@ fun BottomContent(
     }
 }
 
-enum class Preview {
+enum class ScreenPreview {
     CAMERA,
     VIDEO
 }

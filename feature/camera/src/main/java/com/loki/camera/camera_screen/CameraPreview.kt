@@ -18,6 +18,7 @@ import androidx.camera.video.Recorder
 import androidx.camera.video.Recording
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
+import androidx.camera.video.VideoRecordEvent.Finalize
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,17 +57,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 import androidx.core.util.Consumer
+import androidx.lifecycle.LifecycleOwner
 import com.loki.camera.util.executor
 import com.loki.camera.util.getCameraProvider
 import com.loki.camera.util.takePicture
 import com.loki.ui.theme.md_theme_dark_background
 import com.loki.ui.utils.DateUtil
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.Executor
 
 @Composable
 fun CameraPreview(
@@ -102,11 +102,11 @@ fun CameraPreview(
 @Composable
 fun CameraCapture(
     modifier: Modifier = Modifier,
-    isCameraView: Boolean,
-    isPermissionGranted: Boolean,
+    screenPreview: ScreenPreview,
     onImageUri: (imageUri: Uri) -> Unit,
+    onVideoOutput: (VideoOutput) -> Unit,
+    onErrorMessage: (String) -> Unit,
     onGalleryClick: () -> Unit,
-    onPermissionRequired: (isPermissionRequired: Boolean) -> Unit,
     bottomSwitchContent: @Composable () -> Unit
 ) {
 
@@ -117,6 +117,8 @@ fun CameraCapture(
         val coroutineScope = rememberCoroutineScope()
 
         var previewUseCase by remember { mutableStateOf<UseCase>(Preview.Builder().build()) }
+
+        // camera capture
         val imageCaptureUseCase by remember {
             mutableStateOf(
                 ImageCapture.Builder().setCaptureMode(CAPTURE_MODE_MAXIMIZE_QUALITY)
@@ -124,6 +126,24 @@ fun CameraCapture(
             )
         }
 
+        // video capture
+        val qualitySelector = QualitySelector.fromOrderedList(
+            listOf(Quality.UHD, Quality.FHD, Quality.HD, Quality.SD),
+            FallbackStrategy.lowerQualityOrHigherThan(Quality.SD)
+        )
+        val record = Recorder.Builder()
+            .setExecutor(context.executor)
+            .setQualitySelector(qualitySelector)
+            .setTargetVideoEncodingBitRate(5 * 1024 * 1024)
+            .build()
+        val videoCaptureUseCase = VideoCapture.withOutput(record)
+
+        // video controls
+        var recording = remember<Recording?> { null }
+        var recordingStarted by remember { mutableStateOf(false) }
+        var audioEnabled by remember { mutableStateOf(true) }
+
+        // camera controls
         var isFrontCamera by remember { mutableStateOf(false) }
         val cameraSelector = if (isFrontCamera) CameraSelector.DEFAULT_FRONT_CAMERA
             else CameraSelector.DEFAULT_BACK_CAMERA
@@ -138,180 +158,127 @@ fun CameraCapture(
                 }
             )
 
+            when(screenPreview) {
+                ScreenPreview.CAMERA -> {
+                    ImageCapture(
+                        context = context,
+                        lifecycleOwner = lifecycleOwner,
+                        previewUseCase = previewUseCase,
+                        cameraSelector = cameraSelector,
+                        imageCaptureUseCase = imageCaptureUseCase
+                    )
+                }
+
+                ScreenPreview.VIDEO -> {
+                    VideoRecordCapture(
+                        context = context,
+                        lifecycleOwner = lifecycleOwner,
+                        previewUseCase = previewUseCase,
+                        cameraSelector = cameraSelector,
+                        videoCaptureUseCase = videoCaptureUseCase
+                    )
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
             ) {
+
                 CaptureControls(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 32.dp),
-                    isCamera = isCameraView,
+                    screenPreview = screenPreview,
+                    isRecording = recordingStarted,
                     onLeftControlClick = onGalleryClick,
                     onRotateCamera = {
                         isFrontCamera = !isFrontCamera
                     },
                     onCapture = {
-                        if (isCameraView && isPermissionGranted) {
-                            coroutineScope.launch(Dispatchers.IO) {
-                                imageCaptureUseCase
-                                    .takePicture(context.executor)
-                                    .let {
-                                        onImageUri(it.toUri())
-                                    }
+                        when(screenPreview) {
+                            ScreenPreview.CAMERA -> {
+                                coroutineScope.launch {
+                                    imageCapture(
+                                        imageCaptureUseCase,
+                                        context,
+                                        onImageUri
+                                    )
+                                }
                             }
-                        }
-                        else {
-                            onPermissionRequired(true)
+
+                            ScreenPreview.VIDEO -> {
+                                if (!recordingStarted) {
+                                    recordingStarted = true
+                                    recording = startRecordingVideo(
+                                        context = context,
+                                        videoCapture = videoCaptureUseCase,
+                                        audioEnabled = audioEnabled,
+                                        consumer = { event ->
+                                            onVideoRecorded(
+                                                recording = recording,
+                                                event = event,
+                                                onVideoUri = onVideoOutput,
+                                                onErrorMessage = onErrorMessage
+                                            )
+                                        }
+                                    )
+                                }
+                                else {
+                                    recordingStarted = false
+                                    recording?.stop()
+                                    recording = null
+                                }
+                            }
                         }
                     }
                 )
 
                 bottomSwitchContent()
             }
-
-        }
-
-        LaunchedEffect(key1 = cameraSelector) {
-            val cameraProvider = context.getCameraProvider()
-
-            try {
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(
-                    lifecycleOwner,
-                    cameraSelector,
-                    previewUseCase,
-                    imageCaptureUseCase
-                )
-            } catch (e: Exception) {
-                Log.e("Camera Capture", "Failed to bind camera use case", e)
-            }
         }
     }
 }
 
 @Composable
-fun VideoCapture(
-    modifier: Modifier = Modifier,
-    isCameraView: Boolean,
-    isPermissionGranted: Boolean,
-    onVideoUri: (videoUri: String?) -> Unit,
-    onPermissionRequired: (isPermissionRequired: Boolean) -> Unit,
-    bottomSwitchContent: @Composable () -> Unit
+fun ImageCapture(
+    context: Context,
+    lifecycleOwner: LifecycleOwner,
+    previewUseCase: UseCase,
+    cameraSelector: CameraSelector,
+    imageCaptureUseCase: ImageCapture
 ) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val coroutineScope = rememberCoroutineScope()
 
-    var previewUseCase by remember { mutableStateOf<UseCase>(Preview.Builder().build()) }
+    LaunchedEffect(key1 = cameraSelector, key2 = previewUseCase) {
 
-    val qualitySelector = QualitySelector.from(
-        Quality.HD,
-        FallbackStrategy.lowerQualityOrHigherThan(Quality.LOWEST)
-    )
+        val cameraProvider = context.getCameraProvider()
 
-    val record = Recorder.Builder()
-        .setExecutor(context.executor)
-        .setQualitySelector(qualitySelector)
-        .build()
-
-    val videoCaptureUseCase = VideoCapture.withOutput(record)
-
-    var recording = remember<Recording?> { null }
-
-    var recordingStarted by remember { mutableStateOf(false) }
-    var audioEnabled by remember { mutableStateOf(true) }
-
-    var isFrontCamera by remember { mutableStateOf(false) }
-    val cameraSelector = if (isFrontCamera) CameraSelector.DEFAULT_FRONT_CAMERA
-        else CameraSelector.DEFAULT_BACK_CAMERA
-
-    Box(modifier = modifier) {
-        CameraPreview(
-            modifier = Modifier.fillMaxSize(),
-            onUseCase = {
-                previewUseCase = it
-            }
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-        ) {
-            CaptureControls(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                isCamera = isCameraView,
-                isRecording = recordingStarted,
-                audioEnabled = audioEnabled,
-                onLeftControlClick = {
-                    if (!recordingStarted && !isCameraView) {
-                        audioEnabled = !audioEnabled
-                    }
-                },
-                onRotateCamera = {
-                    if (!recordingStarted && !isCameraView) {
-                        isFrontCamera = !isFrontCamera
-                    }
-                },
-                onCapture = {
-
-                    coroutineScope.launch(Dispatchers.IO) {
-                        if (!isCameraView && isPermissionGranted) {
-                            if (!recordingStarted) {
-                                recordingStarted = true
-
-                                val mediaDir = context.externalCacheDirs.firstOrNull()?.let {
-                                    File(it, "Reet").apply { mkdirs() }
-                                }
-
-                                val outputDirectory =
-                                    if (mediaDir != null && mediaDir.exists()) mediaDir else
-                                        context.filesDir
-
-                                recording = startRecordingVideo(
-                                    context = context,
-                                    videoCapture = videoCaptureUseCase,
-                                    outputDirectory = outputDirectory,
-                                    executor = context.executor,
-                                    audioEnabled = audioEnabled,
-                                    consumer = { event ->
-
-                                        when (event) {
-
-                                            is VideoRecordEvent.Finalize -> {
-                                                val uri = event.outputResults.outputUri
-
-                                                if (uri != Uri.EMPTY) {
-                                                    val uriEncoded = URLEncoder.encode(
-                                                        uri.toString(),
-                                                        StandardCharsets.UTF_8.toString()
-                                                    )
-                                                    onVideoUri(uriEncoded)
-                                                }
-                                            }
-                                        }
-                                    }
-                                )
-                            } else {
-                                recordingStarted = false
-                                recording?.stop()
-                                recording = null
-                            }
-                        } else {
-                            onPermissionRequired(true)
-                        }
-                    }
-                }
+        try {
+            cameraProvider.unbindAll()
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                previewUseCase,
+                imageCaptureUseCase
             )
-            bottomSwitchContent()
+        } catch (e: Exception) {
+            Log.e("Camera Capture", "Failed to bind camera use case", e)
         }
     }
+}
 
-    LaunchedEffect(key1 = recordingStarted, key2 = cameraSelector, key3 = recording) {
+@Composable
+fun VideoRecordCapture(
+    context: Context,
+    lifecycleOwner: LifecycleOwner,
+    previewUseCase: UseCase,
+    cameraSelector: CameraSelector,
+    videoCaptureUseCase: VideoCapture<Recorder>,
+) {
+
+    LaunchedEffect(key1 = cameraSelector, key2 = previewUseCase) {
+
         val cameraProvider = context.getCameraProvider()
 
         try {
@@ -328,15 +295,74 @@ fun VideoCapture(
     }
 }
 
+fun onVideoRecorded(
+    recording: Recording?,
+    event: VideoRecordEvent,
+    onVideoUri: (VideoOutput) -> Unit,
+    onErrorMessage: (String) -> Unit
+) {
+
+    when (event) {
+
+        is Finalize -> {
+            recording?.stop()
+
+            val uri = event.outputResults.outputUri
+
+            when(event.error) {
+                Finalize.ERROR_INSUFFICIENT_STORAGE -> {
+                    onErrorMessage("insufficient storage")
+                }
+                Finalize.ERROR_NO_VALID_DATA -> {
+                    onErrorMessage("No data recorded")
+                }
+            }
+
+            if (uri != Uri.EMPTY) {
+
+                recording?.close()
+
+                val uriEncoded = URLEncoder.encode(
+                    uri.toString(),
+                    StandardCharsets.UTF_8.toString()
+                )
+                onVideoUri(
+                    VideoOutput(
+                        uri = uriEncoded.toString(),
+                    )
+                )
+            }
+        }
+    }
+}
+
+suspend fun imageCapture(
+    imageCaptureUseCase: ImageCapture,
+    context: Context,
+    onImageUri: (Uri) -> Unit
+) {
+    imageCaptureUseCase
+        .takePicture(context.executor)
+        .let {
+            onImageUri(it.toUri())
+        }
+}
+
 @SuppressLint("MissingPermission")
 fun startRecordingVideo(
     context: Context,
     videoCapture: VideoCapture<Recorder>,
-    outputDirectory: File,
-    executor: Executor,
     audioEnabled: Boolean,
     consumer: Consumer<VideoRecordEvent>
 ): Recording {
+
+    val mediaDir = context.externalCacheDirs.firstOrNull()?.let {
+        File(it, "Reet").apply { mkdirs() }
+    }
+
+    val outputDirectory =
+        if (mediaDir != null && mediaDir.exists()) mediaDir else
+            context.filesDir
 
     val videoFile = File(
         outputDirectory,
@@ -345,20 +371,19 @@ fun startRecordingVideo(
 
     val outputOptions = FileOutputOptions.Builder(videoFile).build()
 
-
     return videoCapture.output
         .prepareRecording(context, outputOptions)
         .apply {
             if (audioEnabled) withAudioEnabled()
         }
-        .start(executor, consumer)
+        .start(context.executor, consumer)
 
 }
 
 @Composable
 fun CaptureControls(
     modifier: Modifier = Modifier,
-    isCamera: Boolean,
+    screenPreview: ScreenPreview,
     isRecording: Boolean = false,
     audioEnabled: Boolean = true,
     onLeftControlClick: () -> Unit,
@@ -367,10 +392,10 @@ fun CaptureControls(
 ) {
 
     val recordingBackground = if (isRecording) Color.Red else Color.Red.copy(.4f)
-    val captureBackground = if (isCamera) Color.White.copy(.8f) else recordingBackground
+    val captureBackground = if (screenPreview == ScreenPreview.CAMERA) Color.White.copy(.8f) else recordingBackground
 
     val recordingLeftControlIcon = if (audioEnabled) Icons.Filled.Mic else Icons.Filled.MicOff
-    val leftControl = if (isCamera) Icons.Filled.Image else recordingLeftControlIcon
+    val leftControl = if (screenPreview == ScreenPreview.CAMERA) Icons.Filled.Image else recordingLeftControlIcon
 
     Box(
         modifier = modifier

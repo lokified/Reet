@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="allow_permissions"><![CDATA[Allow permissions to use camera. Tap Settings > Permissions, and turn \"Camera\" on]]></string>
+    <string name="open_settings">Open Settings</string>
+</resources>

@@ -39,7 +39,10 @@ import com.loki.report.ReportScreen
 import com.loki.report.ReportViewModel
 import com.loki.settings.SettingsScreen
 import com.loki.settings.SettingsViewModel
+import com.loki.ui.utils.Constants.CAMERA_SCREEN_TYPE
 import com.loki.ui.utils.Constants.REPORT_ID
+import com.loki.ui.utils.Constants.SCREEN_TYPE_PROFILE_CAMERA
+import com.loki.ui.utils.Constants.SCREEN_TYPE_REPORT_CAMERA
 import com.loki.ui.utils.Constants.VIDEO_URI
 import kotlinx.coroutines.delay
 
@@ -153,30 +156,60 @@ fun NavGraphBuilder.reportListScreen(onNavigateTo: (Screen) -> Unit, viewModel: 
     }
 }
 
-fun NavGraphBuilder.newReportScreen(onNavigateTo: (Screen) -> Unit, viewModel: NavigationViewModel) {
+fun NavGraphBuilder.newReportScreen(
+    onNavigateTo: (Screen) -> Unit,
+    viewModel: NavigationViewModel,
+    newReportViewModel: NewReportViewModel
+) {
     composable(
         route = Screen.NewReportScreen.route,
         enterTransition = {
-            slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                animationSpec = tween(600)
-            )
+            when(initialState.destination.route) {
+                Screen.CameraScreen.route -> {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                        animationSpec = tween(600)
+                    )
+                }
+
+                Screen.ReportListScreen.route -> {
+                    slideIntoContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                        animationSpec = tween(600)
+                    )
+                }
+                else -> null
+            }
         },
         exitTransition = {
-            slideOutOfContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Down,
-                animationSpec = tween(200)
-            )
+            when(targetState.destination.route) {
+                Screen.ReportListScreen.route -> {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                        animationSpec = tween(200)
+                    )
+                }
+
+                Screen.CameraScreen.route -> {
+                    slideOutOfContainer(
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                        animationSpec = tween(200)
+                    )
+                }
+                else -> null
+            }
         }
     ) {
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(false)
         }
-        val newReportViewModel = hiltViewModel<NewReportViewModel>()
         NewReportScreen(
             viewModel = newReportViewModel,
             navigateToHome = {
                 onNavigateTo(Screen.ReportListScreen)
+            },
+            navigateToCamera = {
+                onNavigateTo(Screen.CameraScreen.navWith(SCREEN_TYPE_REPORT_CAMERA))
             }
         )
     }
@@ -234,7 +267,11 @@ fun NavGraphBuilder.accountNavGraph(viewModel: NavigationViewModel, onNavigateTo
     }
 }
 
-fun NavGraphBuilder.profileScreen(onNavigateTo: (Screen) -> Unit, onNavigateToLogin: (Screen) -> Unit, viewModel: NavigationViewModel) {
+fun NavGraphBuilder.profileScreen(
+    onNavigateTo: (Screen) -> Unit,
+    onNavigateToLogin: (Screen) -> Unit,
+    viewModel: NavigationViewModel
+) {
     composable(route = Screen.ProfileScreen.route) {
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(true)
@@ -246,7 +283,7 @@ fun NavGraphBuilder.profileScreen(onNavigateTo: (Screen) -> Unit, onNavigateToLo
             navigateToSettings = { onNavigateTo(Screen.SettingsScreen) },
             navigateToChangeUsername = { onNavigateTo(Screen.UsernameChangeScreen) },
             navigateToLogin = { onNavigateToLogin(Screen.LoginScreen) },
-            navigateToCamera = { onNavigateTo(Screen.CameraScreen) }
+            navigateToCamera = { onNavigateTo(Screen.CameraScreen.navWith(SCREEN_TYPE_PROFILE_CAMERA)) }
         )
     }
 }
@@ -305,9 +342,19 @@ fun NavGraphBuilder.settingsScreen(onNavigateBack: () -> Unit, viewModel: Naviga
     }
 }
 
-fun NavGraphBuilder.cameraScreen(onNavigateBack: () -> Unit, onNavigateTo: (Screen) -> Unit, viewModel: NavigationViewModel) {
+fun NavGraphBuilder.cameraScreen(
+    onNavigateBack: () -> Unit,
+    onNavigateTo: (Screen) -> Unit,
+    viewModel: NavigationViewModel,
+    newReportViewModel: NewReportViewModel
+) {
     composable(
-        route = Screen.CameraScreen.route,
+        route = Screen.CameraScreen.withCameraScreenType(),
+        arguments = listOf(
+            navArgument(CAMERA_SCREEN_TYPE) {
+                type = NavType.StringType
+            }
+        ),
         enterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Left,
@@ -324,12 +371,31 @@ fun NavGraphBuilder.cameraScreen(onNavigateBack: () -> Unit, onNavigateTo: (Scre
         LaunchedEffect(key1 = viewModel.isBottomBarVisible.value) {
             viewModel.setBottomBarVisible(false)
         }
+
         val profileViewModel = hiltViewModel<ProfileViewModel>()
+        val screenType = it.arguments?.getString(CAMERA_SCREEN_TYPE)!!
+
         CameraScreen(
             navigateBack = onNavigateBack,
+            screenType = screenType,
             profileViewModel = profileViewModel,
             navigateToVideoPlayer = { videoUri ->
                 onNavigateTo(Screen.VideoPlayerScreen.navWith(videoUri))
+            },
+            onSaveImage = { uri, screenSource ->
+
+                when(screenSource) {
+                    SCREEN_TYPE_PROFILE_CAMERA -> {
+                        profileViewModel.updateProfilePicture(
+                            imageUri = uri,
+                            onSuccess = onNavigateBack
+                        )
+                    }
+                    SCREEN_TYPE_REPORT_CAMERA -> {
+                        newReportViewModel.onChangeImageUri(uri)
+                        onNavigateBack()
+                    }
+                }
             }
         )
     }
@@ -345,7 +411,7 @@ fun NavGraphBuilder.videoPlayerScreen(viewModel: NavigationViewModel) {
         ),
         enterTransition = {
             slideIntoContainer(
-                towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                towards = AnimatedContentTransitionScope.SlideDirection.Up,
                 animationSpec = tween(500)
             )
         },

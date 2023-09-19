@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,7 +56,6 @@ import com.loki.ui.utils.DateUtil.formatDate
 import com.loki.ui.utils.DateUtil.formatTime
 import com.loki.ui.utils.ext.toInitials
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReportScreen(
     viewModel: ReportViewModel,
@@ -364,8 +362,9 @@ fun ReportScreen(
                             .width((deviceWidth - (deviceWidth / 2.4)).dp)
                             .clip(RoundedCornerShape(12.dp)),
                         enabled = !viewModel.isLoading.value,
-                        colors = TextFieldDefaults.textFieldColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(.02f),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.primary.copy(.02f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.primary.copy(.02f),
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent,

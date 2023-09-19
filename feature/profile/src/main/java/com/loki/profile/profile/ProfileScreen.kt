@@ -160,7 +160,7 @@ fun ProfileScreen(
             )
 
             Text(
-                text = "v1.2.0",
+                text = "v0.3.0-beta",
                 fontSize = 12.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
